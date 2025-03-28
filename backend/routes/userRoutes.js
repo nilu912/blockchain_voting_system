@@ -1,4 +1,5 @@
 const { Router } = require("express");
+const jwt = require('jsonwebtoken')
 const ErrorResponse = require("../utils/ErrorResponse");
 const { ethers } = require("ethers");
 const { usersModel, nonceModel } = require("../database/db");
@@ -52,8 +53,30 @@ userRoutes.post("/signup", async (req, res, next) => {
   }
 });
 
-userRoutes.post("/signin", (req, res, next) => {
-  res.send("post");
+userRoutes.post("/signin", async (req, res, next) => {
+  const { wallet_address, signature } = req.body;
+
+  if(!wallet_address || !signature)
+    return next(new ErrorResponse('please pass require fields!', 400));
+
+  const nonce_data = await nonceModel.find({wallet_address})
+  if(!nonce_data.nonce)
+    return next(new ErrorResponse('nonce value not found!', 400))
+  const nonce = nonce_data.nonce;
+  await nonceModel.deleteOne({wallet_address})
+
+  const user = await usersModel.findOne({wallet_address})
+  if(!user)
+    return next(new ErrorResponse('user not registered!'));
+
+  const recoveredAddress = ethers.verifyMessage(nonce, signature);
+
+  if(recoveredAddress.toLocaleLowerCase() !== wallet_address.toLocaleLowerCase())
+    return next(new ErrorResponse('Invalid signature!', 400))
+
+  const token = jwt.sign({wallet_address}, process.env.JWT_SECRET)
+
+
 });
 
 userRoutes.post("/nonce", async (req, res, next) => {
