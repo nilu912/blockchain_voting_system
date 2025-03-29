@@ -79,7 +79,7 @@ userRoutes.post("/signin", async (req, res, next) => {
 
 });
 
-userRoutes.post("/nonce", async (req, res, next) => {
+userRoutes.post("/create_nonce", async (req, res, next) => {
   try {
     const { wallet_address } = req.body;
     if (!wallet_address)
@@ -97,6 +97,15 @@ userRoutes.post("/nonce", async (req, res, next) => {
     );
   }
 });
+userRoutes.get("/get_nonce/:wallet_address", async (req,res,next)=>{
+  const wallet_address = req.params.wallet_address;
+  if(!wallet_address)
+    return next(new ErrorResponse('Please pass the wallet address!', 400))
+  const nonce_data = await nonceModel.findOne({wallet_address});
+  if(!nonce_data.nonce)
+    return next(new ErrorResponse('Please nonce not found!', 400))
+  res.json({nonce})
+})
 module.exports = {
   userRoutes,
 };
