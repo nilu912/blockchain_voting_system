@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link, NavLink } from "react-router-dom";
 import { Navbar, Nav } from "rsuite";
 import CogIcon from "@rsuite/icons/legacy/Cog";
 import { Modal, Button, ButtonToolbar, Placeholder, Form, Input } from "rsuite";
@@ -15,30 +16,71 @@ const Header = () => {
     setModelSize();
     setRegSection(!regSection);
   };
-  const { wallet, loginHandller, registerHandller, connectWallet, isAuthenticated} = useAuth();
-  const connectWalletHandler = () => {
-    console.log("called")
-    connectWallet();
-  }
+  const {
+    wallet,
+    loginHandler,
+    registerHandler,
+    connectWallet,
+    isAuthenticated,
+    logoutHandler,
+  } = useAuth();
+  const [username, setUsername] = useState("");
+
+  const connectWalletHandler = async () => {
+    try {
+      const { account, signer } = await connectWallet(); // Get wallet immediately
+      if (!account) {
+        console.error("Wallet not connected! Please try again.");
+        return;
+      }
+      await loginHandler(account, signer); // Pass wallet directly
+      handleClose();
+    } catch (error) {
+      console.error("Error in connectWalletHandler:", error);
+    }
+  };
+  const handleSubmit = async () => {
+    // e.preventDefault();
+    if (!wallet) {
+      alert("Please connect wallet first");
+      return;
+    }
+    await registerHandler(username);
+    handleRegSection();
+  };
   return (
     <Navbar>
       <Navbar.Brand href="#">RSUITE</Navbar.Brand>
       <Nav>
-        <Nav.Item>Home</Nav.Item>
-        <Nav.Item>News</Nav.Item>
-        <Nav.Item>Products</Nav.Item>
-        <Nav.Menu title="About">
+        <Nav.Item as={NavLink} to="/">
+          Home
+        </Nav.Item>
+        {isAuthenticated && (
+          <>
+            <Nav.Item as={NavLink} to="/election">
+              Election
+            </Nav.Item>
+            <Nav.Item as={NavLink} to="/voting">
+              Voting
+            </Nav.Item>
+          </>
+        )}
+        {/* <Nav.Menu title="About">
           <Nav.Item>Company</Nav.Item>
           <Nav.Item>Team</Nav.Item>
           <Nav.Menu title="Contact">
             <Nav.Item>Via email</Nav.Item>
             <Nav.Item>Via telephone</Nav.Item>
           </Nav.Menu>
-        </Nav.Menu>
+        </Nav.Menu> */}
       </Nav>
       <Nav pullRight className="m-2">
         <ButtonToolbar>
-          <Button onClick={handleOpen}> Connect Wallet</Button>
+          {!isAuthenticated ? (
+            <Button onClick={handleOpen}> Connect Wallet</Button>
+          ) : (
+            <Button onClick={logoutHandler}> Disconnect Wallet</Button>
+          )}
         </ButtonToolbar>
         <Modal
           open={open}
@@ -51,7 +93,9 @@ const Header = () => {
           </Modal.Header>
           <Modal.Body className="">
             <div className="flex pl-20 pr-20 justify-around">
-              <Button appearance="default" onClick={connectWalletHandler}>Connect Wallet</Button>
+              <Button appearance="default" onClick={connectWalletHandler}>
+                Connect Wallet
+              </Button>
               <Button appearance="primary" onClick={handleRegSection}>
                 New User?
               </Button>
@@ -61,25 +105,45 @@ const Header = () => {
             New User?
             </Button> */}
             {regSection && (
-              <Form className="p-6 h-20rem">
+              <Form className="p-6 h-20rem" onSubmit={handleSubmit}>
                 <Form.Group controlId="name">
                   <Form.ControlLabel>Username</Form.ControlLabel>
-                  <Form.Control name="name" />
+                  <Form.Control
+                    name="username"
+                    onChange={(value) => {
+                      setUsername(value);
+                    }}
+                    required
+                  />
                   <Form.HelpText>Username is required</Form.HelpText>
                 </Form.Group>
                 <Form.Group controlId="wallet">
-                  <Button
-                    color="cyan"
-                    appearance="primary"
-                    onClick={connectWallet}
-                  >
-                    Connect Wallet
-                  </Button>
+                  {!wallet ? (
+                    <Button
+                      color="cyan"
+                      appearance="primary"
+                      onClick={connectWallet}
+                    >
+                      Connect Wallet
+                    </Button>
+                  ) : (
+                    <Button
+                      color="cyan"
+                      appearance="secondery"
+                      onClick={connectWallet}
+                    >
+                      {wallet.slice(0, 6)}......{wallet.slice(-4)}
+                    </Button>
+                  )}
                 </Form.Group>
                 <Form.Group>
                   <ButtonToolbar>
-                    <Button appearance="primary">Submit</Button>
-                    <Button appearance="default">Cancel</Button>
+                    <Button appearance="primary" type="submit">
+                      Submit
+                    </Button>
+                    <Button appearance="default" onClick={handleRegSection}>
+                      Cancel
+                    </Button>
                   </ButtonToolbar>
                 </Form.Group>
               </Form>

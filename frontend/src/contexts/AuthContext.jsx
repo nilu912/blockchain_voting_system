@@ -3,11 +3,6 @@ import { useContext, useState, createContext, useEffect } from "react";
 
 const AuthContext = createContext();
 
-// const AuthContext = () => {
-//   return useContext(AuthContext);
-// }
-// export default useAuth;
-
 const AuthProvider = ({ children }) => {
   const [wallet, setWallet] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -16,43 +11,50 @@ const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    setIsAuthenticated(token ? true : false);
-    setToken(token)
-  }, []);
-
+    setIsAuthenticated(!!token); // Convert to boolean: true if token exists, false otherwise
+  }, []); // Runs only once on component mount
+  
   const connectWallet = async () => {
     if (!window.ethereum) {
       alert("Metamask is not installed, install it first!");
-      return;
+      return null;
     }
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-    const account = await signer.getAddress();
-    setSigner(signer);
-    setWallet(account);
-    console.log(wallet);
-  };
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const account = await signer.getAddress();
 
-  const loginHandler = async () => {
+      setWallet(account);
+      setSigner(signer);
+
+      return {account, signer};
+    } catch (error) {
+      console.error("Error connecting wallet:", error);
+      return null;
+    }
+  };
+  const loginHandler = async (wallet, signer) => {
     if (!wallet) {
       console.log("No wallet connected");
       return;
     }
-    const nonce_data = await fetch(
-      `http://localhost:5000/api/users/nonce/${wallet}`,
+    const nonceResponse = await fetch(
+      `http://localhost:5000/api/users/create_nonce/`,
       {
-        method: "GET",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ wallet_address: wallet }),
       }
     );
+    const nonce_data = await nonceResponse.json();
     const nonce = nonce_data.nonce;
     if (!nonce) {
       console.log("nonce not found!");
       return;
     }
-
+    console.log(nonce);
     const signature = await signer.signMessage(nonce, wallet);
 
     const verifyResponce = await fetch(
@@ -60,7 +62,7 @@ const AuthProvider = ({ children }) => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wallet_address, signature }),
+        body: JSON.stringify({ wallet_address: wallet, signature }),
       }
     );
     const { token } = await verifyResponce.json();
@@ -69,13 +71,15 @@ const AuthProvider = ({ children }) => {
       return;
     }
     localStorage.setItem("token", token);
-    setToken(token)
+    setToken(token);
+    setIsAuthenticated(true);
 
     alert("Signin successfull!");
   };
 
   const logoutHandler = () => {
-    wallet(null);
+    setIsAuthenticated(false);
+    setWallet(null);
     localStorage.removeItem("token");
   };
 
@@ -85,43 +89,60 @@ const AuthProvider = ({ children }) => {
 
   const registerHandler = async (username) => {
     try {
-      const userResponse = await fetch(
-        `http://localhost:5000/api/users/${wallet}/`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+      try {
+        const userResponse = await fetch(
+          `http://localhost:5000/api/users/user/${wallet}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const userData = await userResponse.json();
+        if (userData.wallet_address) {
+          alert("User already registered!");
+          return;
         }
-      );
-      if (userResponse) {
-        alert("User already registered!");
-        return;
+      } catch (error) {
+        console.error(
+          "Error while checking if user is already registered:",
+          error
+        );
       }
-      const nonce_data = await fetch(
+      const response = await fetch(
         `http://localhost:5000/api/users/create_nonce/`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ wallet }),
+          body: JSON.stringify({ wallet_address: wallet }),
         }
       );
-      const nonce = nonce_data.nonce;
-      if (!nonce) {
+      const nonce_data = await response.json();
+      if (!nonce_data.nonce) {
         console.log("nonce not found!");
         return;
       }
+      const nonce = nonce_data.nonce;
+      const signature = await signer.signMessage(nonce.toString());
 
-      const signature = signer.signMessage(nonce, wallet);
-
-      const verifyResponce = fetch("http://localhost:5000/api/users/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.parse({ username, wallet_address: wallet, signature }),
-      });
-      console.log(verifyResponce);
+      const signupResponse = await fetch(
+        "http://localhost:5000/api/users/signup",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, wallet_address: wallet, signature }),
+        }
+      );
+      const signupData = await signupResponse.json();
+      if (!signupData) {
+        console.error("not login");
+        return;
+      }
+      alert("User successfully signup.");
     } catch {
       console.log("Something wents wrong during registration!");
     }
@@ -144,4 +165,4 @@ const AuthProvider = ({ children }) => {
   );
 };
 
-export {AuthContext, AuthProvider};
+export { AuthContext, AuthProvider };
