@@ -43,7 +43,7 @@ userRoutes.post("/signup", async (req, res, next) => {
     if (!userResponse) {
       return res.status(404).json({ error: "User not created!" });
     }
-    console.log("User Signup successfully!");
+    // console.log("User Signup successfully!");
     res
       .status(200)
       .json({ message: "You are signed up successfully.", userResponse });
@@ -75,7 +75,7 @@ userRoutes.post("/signin", async (req, res, next) => {
     return next(new ErrorResponse("Invalid signature!", 400));
 
   const token = jwt.sign({ wallet_address }, process.env.JWT_SECRET);
-  console.log("user signin!");
+  // console.log("user signin!");
   res.status(200).json({token});
 });
 
