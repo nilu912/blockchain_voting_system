@@ -76,7 +76,7 @@ userRoutes.post("/signin", async (req, res, next) => {
 
   const token = jwt.sign({ wallet_address }, process.env.JWT_SECRET);
   // console.log("user signin!");
-  res.status(200).json({token});
+  res.status(200).json({ token });
 });
 
 userRoutes.get("/user/:wallet_address", async (req, res, next) => {
@@ -110,10 +110,10 @@ userRoutes.post("/create_nonce", async (req, res, next) => {
       return next(new ErrorResponse("Please pass wallet address!", 400));
 
     const nonce = Math.floor(Math.random() * 1000000).toString();
-    const nonce_data = await nonceModel.create({
-      wallet_address,
-      nonce,
-    });
+      const nonce_data = await nonceModel.create({
+        wallet_address,
+        nonce,
+      });
     res.status(200).json({ nonce });
   } catch (error) {
     return next(
@@ -126,9 +126,17 @@ userRoutes.get("/get_nonce/:wallet_address", async (req, res, next) => {
   if (!wallet_address)
     return next(new ErrorResponse("Please pass the wallet address!", 400));
   const nonce_data = await nonceModel.findOne({ wallet_address });
+  console.log(nonce_data)
   if (!nonce_data.nonce)
     return next(new ErrorResponse("Please nonce not found!", 400));
   res.json({ nonce });
+});
+userRoutes.delete("/del_nonce/:wallet_address", async (req, res, next) => {
+  const wallet_address = req.params.wallet_address;
+  if (!wallet_address)
+    return next(new ErrorResponse("Please pass the wallet address!", 400));
+  const nonce_data = await nonceModel.deleteOne({ wallet_address });
+  res.json({ message:"Nonce deleted!" });
 });
 module.exports = {
   userRoutes,

@@ -13,7 +13,7 @@ const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     setIsAuthenticated(!!token); // Convert to boolean: true if token exists, false otherwise
   }, []); // Runs only once on component mount
-  
+
   const connectWallet = async () => {
     if (!window.ethereum) {
       alert("Metamask is not installed, install it first!");
@@ -27,7 +27,7 @@ const AuthProvider = ({ children }) => {
       setWallet(account);
       setSigner(signer);
 
-      return {account, signer};
+      return { account, signer };
     } catch (error) {
       console.error("Error connecting wallet:", error);
       return null;
@@ -38,6 +38,7 @@ const AuthProvider = ({ children }) => {
       console.log("No wallet connected");
       return;
     }
+
     const nonceResponse = await fetch(
       `http://localhost:5000/api/users/create_nonce/`,
       {
@@ -67,6 +68,7 @@ const AuthProvider = ({ children }) => {
     );
     const { token } = await verifyResponce.json();
     if (!token) {
+      alert("You are not registered yet. please register first!");
       console.log("Token not found!");
       return;
     }

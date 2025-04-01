@@ -27,8 +27,8 @@ const Header = () => {
   const [username, setUsername] = useState("");
 
   const connectWalletHandler = async () => {
+    const { account, signer } = await connectWallet(); // Get wallet immediately
     try {
-      const { account, signer } = await connectWallet(); // Get wallet immediately
       if (!account) {
         console.error("Wallet not connected! Please try again.");
         return;
@@ -36,6 +36,17 @@ const Header = () => {
       await loginHandler(account, signer); // Pass wallet directly
       handleClose();
     } catch (error) {
+      const deleteNonce = await fetch(
+        `http://localhost:5000/api/users/del_nonce/${account}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log(await deleteNonce.json())
+
       console.error("Error in connectWalletHandler:", error);
     }
   };

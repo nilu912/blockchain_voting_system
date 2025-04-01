@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Elections from "./pages/Elections";
 import Voting from "./pages/Voting";
 import "./App.css";
+import Admin from "./pages/Admin";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route element={<PrivateRoute />}>
             <Route path="/election" element={<Elections />} />
             <Route path="/voting" element={<Voting />} />
+            {/* <Route path="/admin" element={<Admin />} /> */}
           </Route>
         </Routes>
       </Router>
