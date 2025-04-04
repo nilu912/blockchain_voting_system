@@ -71,7 +71,7 @@ export default function Admin() {
               <div className="p-4 bg-green-500 text-white rounded-lg shadow">
                 <p className="text-lg">Active Elections</p>
                 <h3 className="text-2xl font-bold">
-                  {elections.filter((e) => e.active).length}
+                  {elections.filter((e) => e.isActive).length}
                 </h3>
               </div>
               <div className="p-4 bg-yellow-500 text-white rounded-lg shadow">

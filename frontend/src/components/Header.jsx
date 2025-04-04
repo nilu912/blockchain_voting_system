@@ -81,8 +81,8 @@ const Header = () => {
             <Nav.Item as={NavLink} to="/newElection">
               New Elections
             </Nav.Item>
-            <Nav.Item as={NavLink} to="/manageElection">
-              Manage Elections
+            <Nav.Item as={NavLink} to="/electionsDashboard">
+              Election dashboard
             </Nav.Item>
             <Nav.Item as={NavLink} to="/admin">
               Admin
@@ -99,7 +99,7 @@ const Header = () => {
         </Nav.Menu> */}
       </Nav>
       <Nav pullRight className="m-2 flex">
-        {(isAuthenticated && wallet) && (
+        {isAuthenticated && wallet && (
           <div className="pl-4 pr-6 my-auto ">
             <p>{`${wallet.toString().slice(0, 6)}......${wallet
               .toString()

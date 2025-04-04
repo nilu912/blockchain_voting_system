@@ -9,7 +9,7 @@ import Voting from "./pages/Voting";
 import "./App.css";
 import Admin from "./pages/Admin";
 import NewElections from "./pages/NewElections";
-import ManageElections from "./pages/ManageElections";
+import ListElections from "./pages/ListElections";
 
 function App() {
   return (
@@ -24,7 +24,7 @@ function App() {
           </Route>
           <Route element={<AdminRoute />}>
             <Route path="/newElection" element={<NewElections />} />
-            <Route path="/manageElection" element={<ManageElections />} />
+            <Route path="/electionsDashboard" element={<ListElections />} />
             <Route path="/admin" element={<Admin />} />
           </Route>
         </Routes>
