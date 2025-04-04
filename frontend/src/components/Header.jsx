@@ -23,6 +23,7 @@ const Header = () => {
     connectWallet,
     isAuthenticated,
     logoutHandler,
+    isAdmin,
   } = useAuth();
   const [username, setUsername] = useState("");
 
@@ -45,7 +46,7 @@ const Header = () => {
           },
         }
       );
-      console.log(await deleteNonce.json())
+      console.log(await deleteNonce.json());
 
       console.error("Error in connectWalletHandler:", error);
     }
@@ -61,18 +62,30 @@ const Header = () => {
   };
   return (
     <Navbar>
-      <Navbar.Brand href="#">RSUITE</Navbar.Brand>
       <Nav>
         <Nav.Item as={NavLink} to="/">
           Home
         </Nav.Item>
-        {isAuthenticated && (
+        {isAuthenticated && !isAdmin && (
           <>
             <Nav.Item as={NavLink} to="/election">
               Election
             </Nav.Item>
             <Nav.Item as={NavLink} to="/voting">
               Voting
+            </Nav.Item>
+          </>
+        )}
+        {isAdmin && (
+          <>
+            <Nav.Item as={NavLink} to="/newElection">
+              New Elections
+            </Nav.Item>
+            <Nav.Item as={NavLink} to="/manageElection">
+              Manage Elections
+            </Nav.Item>
+            <Nav.Item as={NavLink} to="/admin">
+              Admin
             </Nav.Item>
           </>
         )}
@@ -85,7 +98,14 @@ const Header = () => {
           </Nav.Menu>
         </Nav.Menu> */}
       </Nav>
-      <Nav pullRight className="m-2">
+      <Nav pullRight className="m-2 flex">
+        {(isAuthenticated && wallet) && (
+          <div className="pl-4 pr-6 my-auto ">
+            <p>{`${wallet.toString().slice(0, 6)}......${wallet
+              .toString()
+              .slice(-4)}`}</p>
+          </div>
+        )}
         <ButtonToolbar>
           {!isAuthenticated ? (
             <Button onClick={handleOpen}> Connect Wallet</Button>

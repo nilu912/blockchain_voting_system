@@ -1,5 +1,5 @@
 import React from 'react'
-import ElectoinList from "../componets/ElectionList"
+import ElectoinList from "../components/ElectionList"
 
 const Elections = () => {
   return (

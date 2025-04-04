@@ -1,5 +1,9 @@
 import { ethers } from "ethers";
 import { useContext, useState, createContext, useEffect } from "react";
+import { getEthereumContract } from "../utils/contract";
+
+import contractABI from "../contracts/Voting.json";
+const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
 
 const AuthContext = createContext();
 
@@ -8,6 +12,9 @@ const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [signer, setSigner] = useState(null);
   const [token, setToken] = useState(null);
+  const [provider, setProvider] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [contract, setContract] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -24,6 +31,7 @@ const AuthProvider = ({ children }) => {
       const signer = await provider.getSigner();
       const account = await signer.getAddress();
 
+      setProvider(provider);
       setWallet(account);
       setSigner(signer);
 
@@ -79,9 +87,27 @@ const AuthProvider = ({ children }) => {
     alert("Signin successfull!");
   };
 
+  useEffect(() => {
+    const contractCalling = async () => {
+      const contractInstance = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        contractABI.abi,
+        signer
+      );
+      setContract(contractInstance);
+      const ownerAdd = await contractInstance.getOwner();
+      if (ownerAdd.toLowerCase().toString() == wallet.toLowerCase()) {
+        setIsAdmin(true);
+      }
+    };
+
+    contractCalling();
+  }, [wallet]);
+
   const logoutHandler = () => {
     setIsAuthenticated(false);
     setWallet(null);
+    setProvider(null);
     localStorage.removeItem("token");
   };
 
@@ -155,6 +181,10 @@ const AuthProvider = ({ children }) => {
       value={{
         wallet,
         token,
+        contract,
+        provider,
+        signer,
+        isAdmin,
         isAuthenticated,
         connectWallet,
         loginHandler,

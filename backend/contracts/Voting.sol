@@ -1,334 +1,284 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract Voting {
+contract Voting{
     address immutable owner;
-    struct Election {
+    struct Election{
         uint electionId;
         string electionName;
         bool isActive;
-        uint startTime;
+        uint startTime; 
         uint endTime;
         uint totalCandidates;
         uint totalVoters;
         uint totalVotes;
         uint winnerId;
-        bool isCompleted;
+        bool registrationPhase;
+        bool votingPhase;
+        bool isCompleted;    
     }
-    struct Candidate {
+    struct Candidate{
         uint candidateId;
         address candidateAddress;
         string candidateName;
         uint electionId;
         uint voteCount;
     }
-    struct Voter {
+    struct Voter{
         uint voterId;
         string voterName;
         address voterAddress;
         uint electionId;
         uint candidateId;
         bool isVoted;
+        bool isRegistered;
     }
-    mapping(uint => Election) public elections;
+    mapping(uint => Election) public  elections;
     mapping(uint => mapping(uint => Candidate)) public candidates;
     mapping(uint => mapping(address => bool)) public isCandidateRegistered;
-    mapping(uint => mapping(address => Voter)) public voters;
-    uint electionCount;
+    mapping(uint => mapping (address => Voter)) public voters;
 
+    event electionCreated(uint indexed electionId, string electionName, uint startTime, uint endTime);
+    uint electionCount;
     // uint candidateCount;
     // uint voterCount;
-    constructor() {
+    constructor(){
         owner = msg.sender;
     }
-
-    modifier onlyAdmin() {
-        require(owner == msg.sender, "only admin");
+    modifier onlyAdmin(){
+        require(owner==msg.sender,"only admin");
         _;
     }
-    modifier isValidString(string memory _string) {
-        require(bytes(_string).length > 0, "Invalid");
+    modifier isValidString(string memory _string){
+        require(bytes(_string).length > 0,"Invalid");
         _;
     }
-    modifier isValidNumber(uint _number) {
-        require(_number > 0, "Invalid");
+    modifier isValidNumber(uint _number){
+        require(_number > 0,"Invalid");
         _;
     }
-    modifier isValidAddress(address _address) {
-        require(_address != address(0), "Invalid");
+    modifier isValidAddress(address _address){
+        require(_address != address(0),"Invalid");
         _;
     }
-
-    function getBlockTimestamp() public view returns (uint) {
+    function getOwner() public view  returns (address){
+        return owner;
+    }
+    function getBlockTimestamp() public view returns(uint){
         return block.timestamp;
     }
-
-    function createElection(
-        string memory _electionName,
-        uint _startTime,
-        uint _endTime
-    ) public onlyAdmin isValidString(_electionName) returns (uint) {
+    function createElection(string memory _electionName,uint _startTime, uint _endTime) onlyAdmin isValidString(_electionName) public returns(uint){
         require(block.timestamp <= _endTime, "Invalid end time!");
         // require(elections[_electionId]._electionName != _electionName);
-        require(_startTime <= _endTime, "Start time must be before end time");
+        require(_startTime<=_endTime,"Start time must be before end time");
         elections[electionCount] = Election({
-            electionId: electionCount,
-            electionName: _electionName,
-            isActive: false,
-            startTime: _startTime,
-            endTime: _endTime,
-            totalCandidates: 0,
-            totalVoters: 0,
-            totalVotes: 0,
-            winnerId: 0,
-            isCompleted: false
-        });
+                        electionId: electionCount, 
+                        electionName: _electionName, 
+                        isActive: false,
+                        startTime: _startTime,
+                        endTime: _endTime,
+                        totalCandidates: 0,
+                        totalVoters: 0,
+                        totalVotes: 0,
+                        winnerId: 0,
+                        registrationPhase: false,
+                        votingPhase: false,
+                        isCompleted: false
+                    });
+        emit electionCreated(electionCount, _electionName, _startTime, _endTime);
         electionCount++;
         return electionCount;
     }
-
-    function addCandidate(
-        uint _electionId,
-        string memory _candidateName,
-        address _candidateAddress
-    )
-        public
-        onlyAdmin
+    function addCandidate(uint _electionId, string memory _candidateName, address _candidateAddress) 
+        onlyAdmin 
         isValidString(_candidateName)
-        isValidAddress(_candidateAddress)
-        returns (uint)
-    {
-        require(_electionId < electionCount, "Invalid Election Id");
-        require(
-            !isCandidateRegistered[_electionId][_candidateAddress],
-            "Candidate Already added!"
-        );
-        uint candidateCount = elections[_electionId].totalCandidates++;
-        candidates[_electionId][candidateCount] = Candidate({
-            candidateId: candidateCount,
-            candidateAddress: _candidateAddress,
-            candidateName: _candidateName,
-            electionId: _electionId,
-            voteCount: 0
-        });
-        isCandidateRegistered[_electionId][_candidateAddress] = true;
+        isValidAddress(_candidateAddress) public returns(uint){
+            require(_electionId<electionCount, "Invalid Election Id");
+            require(!isCandidateRegistered[_electionId][_candidateAddress], "Candidate Already added!");
+            require(elections[_electionId].registrationPhase, "Registration phase not active!");
+            uint candidateCount = elections[_electionId].totalCandidates++;
+            candidates[_electionId][candidateCount] = Candidate({
+                        candidateId: candidateCount,
+                        candidateAddress: _candidateAddress,
+                        candidateName: _candidateName,
+                        electionId: _electionId,
+                        voteCount: 0 });
+            isCandidateRegistered[_electionId][_candidateAddress] = true;
         return candidateCount;
     }
-
-    function getElection(
-        uint _electionId
-    )
-        public
-        view
-        returns (
-            uint electionId,
-            string memory electionName,
-            bool isActive,
-            uint startTime,
-            uint endTime,
-            uint totalCandidates,
-            uint totalVoters,
-            uint totalVotes,
-            uint winnerId,
-            bool isCompleted
-        )
-    {
+    function getElection(uint _electionId) public view returns( 
+            uint electionId, string memory electionName,
+            bool isActive, uint startTime, uint endTime,
+            uint totalCandidates, uint totalVoters,
+            uint totalVotes, uint winnerId, bool isCompleted    
+        ){
         require(_electionId < electionCount, "Invalid election id!");
-        Election memory election = elections[_electionId];
-        return (
+        Election memory election = elections[_electionId];  
+        return ( 
             election.electionId,
             election.electionName,
             election.isActive,
-            election.startTime,
+            election.startTime, 
             election.endTime,
             election.totalCandidates,
             election.totalVoters,
             election.totalVotes,
-            election.winnerId,
-            election.isCompleted
-        );
+            election.winnerId, 
+            election.isCompleted);    
     }
-
-    function getCandidate(
-        uint _electionId,
-        uint _candidateId
-    )
-        public
-        view
-        returns (
-            uint candidateId,
-            address candidateAddress,
-            string memory candidateName,
-            uint electionId,
-            uint voteCount
-        )
-    {
+    function getCandidate(uint _electionId, uint _candidateId) public view returns (
+                uint candidateId, address candidateAddress,
+                string memory candidateName, uint electionId, uint voteCount){
         uint candidateCount = elections[_electionId].totalCandidates;
         require(_electionId < electionCount, "Invalid candidate id!");
         require(_candidateId <= candidateCount, "Invalid candidate id!");
-        Candidate memory candidate = candidates[_electionId][_candidateId];
-        return (
-            candidate.candidateId,
+        Candidate memory candidate = candidates[_electionId][_candidateId];  
+        return ( 
+            candidate.candidateId, 
             candidate.candidateAddress,
-            candidate.candidateName,
-            candidate.electionId,
-            candidate.voteCount
-        );
+            candidate.candidateName, 
+            candidate.electionId, 
+            candidate.voteCount);
     }
 
-    function getAllCandidates(
-        uint _electionId
-    )
-        public
-        view
-        returns (
-            uint[] memory,
-            string[] memory,
-            address[] memory,
-            uint[] memory
-        )
-    {
-        require(_electionId < electionCount, "Invalid election id!");
-        uint candidateCount = elections[_electionId].totalCandidates;
-        uint[] memory candidateId = new uint[](candidateCount);
-        address[] memory candidateAddress = new address[](candidateCount);
-        string[] memory candidateName = new string[](candidateCount);
-        uint[] memory voteCount = new uint[](candidateCount);
-        for (uint i = 0; i < candidateCount; i++) {
-            candidateId[i] = candidates[_electionId][i].candidateId;
-            candidateAddress[i] = candidates[_electionId][i].candidateAddress;
-            candidateName[i] = candidates[_electionId][i].candidateName;
-            voteCount[i] = candidates[_electionId][i].voteCount;
+    function getAllElections() public view returns (Election[] memory) {
+        Election[] memory allElections = new Election[](electionCount);
+
+        for (uint i = 0; i < electionCount; i++) {
+            allElections[i] = elections[i];
         }
-        return (candidateId, candidateName, candidateAddress, voteCount);
-    }
 
-    function castVote(
-        string memory _voterName,
-        uint _electionId,
-        uint _candidateId
-    ) public isValidString(_voterName) returns (uint voterId) {
+        return allElections;
+    }
+    function getAllCandidates(uint _electionId) public view 
+    returns(Candidate[] memory){
+        require(_electionId < electionCount,"Invalid election id!");
         uint candidateCount = elections[_electionId].totalCandidates;
+        Candidate[] memory allCandidates = new Candidate[](candidateCount);
+        for(uint i=0; i< candidateCount; i++){
+            allCandidates[i] = candidates[_electionId][i];
+        }
+        return (allCandidates);
+    }
+    function regVoter(string memory _voterName, uint _electionId, uint _candidateId)
+                 isValidString(_voterName) public returns (uint voterId){
+        uint candidateCount = elections[_electionId].totalCandidates;
+        require(!voters[_electionId][msg.sender].isRegistered, "voter is already registered!");
         uint voterCount = elections[_electionId].totalVoters++;
-        require(_electionId < electionCount, "Invalid election id");
-        require(_candidateId < candidateCount, "invalid candidate id");
+        require(_electionId < electionCount,"Invalid election id");
+        require(_candidateId < candidateCount,"invalid candidate id");
         uint newVoterId = voterCount;
-        require(
-            !voters[_electionId][msg.sender].isVoted,
-            "you already voted for this election!)"
-        );
         require(elections[_electionId].isActive, "election is not active!");
-        require(
-            elections[_electionId].startTime <= block.timestamp &&
-                elections[_electionId].endTime >= block.timestamp,
-            "Invalid time for voting"
-        );
-        require(
-            candidates[_electionId][_candidateId].electionId == _electionId,
-            "Invalid Candidate Id"
-        );
-        voters[_electionId][msg.sender] = Voter({
-            voterId: newVoterId,
-            voterName: _voterName,
-            voterAddress: msg.sender,
-            electionId: _electionId,
-            candidateId: _candidateId,
-            isVoted: true
-        });
-        elections[_electionId].totalVotes++;
-        candidates[_electionId][_candidateId].voteCount++;
+        require(elections[_electionId].registrationPhase, "Registration phase is not active!");
+        // require(candidates[_electionId][_candidateId].electionId == _electionId,"Invalid Candidate Id");
+        voters[_electionId][msg.sender] = Voter({ 
+                    voterId: newVoterId,
+                    voterName: _voterName,
+                    voterAddress: msg.sender,
+                    electionId: _electionId,
+                    candidateId: 0,
+                    isVoted: false,
+                    isRegistered: true
+                });
         return newVoterId;
     }
 
-    function getVoter(
-        uint _electionId,
-        address _voterAddress
-    )
-        public
-        view
-        isValidNumber(_electionId)
-        returns (
-            uint voterId,
-            string memory voterName,
-            address voterAddress,
-            uint electionId,
-            uint candidateId,
-            bool isVoted
-        )
+    function castVote(uint _electionId, uint _candidateId) public returns (uint voterId){
+        require(voters[_electionId][msg.sender].isRegistered, "voter is not registered!");
+        uint candidateCount = elections[_electionId].totalCandidates;
+        require(_electionId < electionCount,"Invalid election id");
+        require(_candidateId < candidateCount,"invalid candidate id");
+        require(!voters[_electionId][msg.sender].isVoted, "you already voted for this election!)");
+        require(elections[_electionId].isActive, "election is not active!");
+        require(elections[_electionId].votingPhase, "Voting is not active!");
+        require(elections[_electionId].startTime <= block.timestamp &&
+                elections[_electionId].endTime >= block.timestamp,"Invalid time for voting");
+        require(candidates[_electionId][_candidateId].electionId == _electionId,"Invalid Candidate Id");
+        voters[_electionId][msg.sender].candidateId= _candidateId;
+        voters[_electionId][msg.sender].isVoted = true;
+        elections[_electionId].totalVotes++;
+        candidates[_electionId][_candidateId].voteCount++;
+        return voters[_electionId][msg.sender].voterId;
+    }
+    function getVoter(uint _electionId, address _voterAddress) isValidNumber(_electionId) public view returns (
+                    uint voterId, string memory voterName,
+                    address voterAddress, uint electionId, uint candidateId, bool isVoted )
     {
-        require(_electionId < electionCount, "Invalid election Id");
-        if (_voterAddress == address(0)) _voterAddress = msg.sender;
+        require(_electionId < electionCount,"Invalid election Id");
+        if(_voterAddress == address(0))
+            _voterAddress=msg.sender;
         Voter memory voter = voters[_electionId][_voterAddress];
-        return (
-            voter.voterId,
+        return(
+            voter.voterId, 
             voter.voterName,
             voter.voterAddress,
-            voter.electionId,
-            voter.candidateId,
+            voter.electionId,    
+            voter.candidateId,      
             voter.isVoted
         );
     }
-
-    function activeElection(
-        uint _electionId
-    ) public onlyAdmin returns (string memory) {
+    function activeElection(uint _electionId) onlyAdmin public returns (string memory){
         require(_electionId < electionCount, "Invalid Election Id");
-        require(
-            !elections[_electionId].isCompleted,
-            "election is already completed!"
-        );
-        require(
-            !elections[_electionId].isActive,
-            "election is already active!"
-        );
+        require(!elections[_electionId].isCompleted, "election is already completed!");
+        require(!elections[_electionId].isActive, "election is already active!");
         elections[_electionId].isActive = true;
         return "Election is Active";
     }
-
-    function deactiveElection(
-        uint _electionId
-    ) public onlyAdmin returns (string memory) {
+    function deactiveElection(uint _electionId) onlyAdmin public returns (string memory){
         require(_electionId <= electionCount, "Invalid Election Id");
-        require(
-            elections[_electionId].isActive,
-            "election is already deactive!"
-        );
+        require(elections[_electionId].isActive, "Election is already deactiveted!");
         elections[_electionId].isActive = false;
+        elections[_electionId].registrationPhase = false;
+        elections[_electionId].votingPhase = false;
         return "Election is Deactive";
     }
-
-    function completeElection(
-        uint _electionId
-    ) public onlyAdmin returns (string memory) {
+    function activeRegistration(uint _electionId) onlyAdmin public returns (string memory){
+        require(_electionId < electionCount, "Invalid Election Id");
+        require(elections[_electionId].isActive, "election is deactivated!");
+        require(!elections[_electionId].registrationPhase, "registration is already activated!");
+        elections[_electionId].registrationPhase = true;
+        return "Now registration phase is Active";
+    }
+    function deactiveRegistration(uint _electionId) onlyAdmin public returns (string memory){
+        require(_electionId < electionCount, "Invalid Election Id");
+        require(elections[_electionId].isActive, "election is deactivated!");
+        require(elections[_electionId].registrationPhase, "registration is already deactivated!");
+        elections[_electionId].registrationPhase = false;
+        return "Election is Active";
+    }
+    function activeVoting(uint _electionId) onlyAdmin public returns (string memory){
+        require(_electionId < electionCount, "Invalid Election Id");
+        require(elections[_electionId].isActive, "election is deactivated!");
+        require(!elections[_electionId].registrationPhase, "registration is active!");
+        require(!elections[_electionId].votingPhase, "Voting phase is already activeted!");
+        elections[_electionId].votingPhase = true;
+        return "Election is Active";
+    }
+    function deactiveVoting(uint _electionId) onlyAdmin public returns (string memory){
+        require(_electionId < electionCount, "Invalid Election Id");
+        require(elections[_electionId].isActive, "election is deactivated!");
+        require(!elections[_electionId].registrationPhase, "registration is already activated!");
+        require(elections[_electionId].votingPhase, "Voting already deactivated@");
+        elections[_electionId].votingPhase = false;
+        return "Election is Active";
+    }
+    function completeElection(uint _electionId) onlyAdmin public returns (string memory){
         require(_electionId <= electionCount, "Invalid Election Id");
-        require(
-            !elections[_electionId].isActive,
-            "election is already active!"
-        );
-        require(
-            !elections[_electionId].isCompleted,
-            "election is already completed!"
-        );
+        require(!elections[_electionId].isActive, "election is already active!");        
+        require(!elections[_electionId].isCompleted, "election is already completed!");
         elections[_electionId].isCompleted = true;
         return "Election is Completed";
     }
-
-    function getWinner(uint _electionId) public onlyAdmin returns (uint, uint) {
+    function getWinner(uint _electionId) onlyAdmin public returns(uint, uint){
         require(_electionId < electionCount, "Invalid Election Id");
-        require(
-            elections[_electionId].isCompleted,
-            "election is not completed yet"
-        );
-        require(
-            !elections[_electionId].isActive,
-            "election is already active!"
-        );
+        require(elections[_electionId].isCompleted,"election is not completed yet");
+        require(!elections[_electionId].isActive, "election is already active!");
         uint candidateCount = elections[_electionId].totalCandidates;
         uint maxVote;
         uint winnerId;
-        for (uint i = 0; i < candidateCount; i++) {
-            if (candidates[_electionId][i].electionId == _electionId) {
-                if (maxVote < candidates[_electionId][i].voteCount) {
+        for(uint i = 0 ; i < candidateCount; i++){
+            if(candidates[_electionId][i].electionId == _electionId){
+                if(maxVote < candidates[_electionId][i].voteCount){
                     maxVote = candidates[_electionId][i].voteCount;
                     winnerId = i;
                 }
