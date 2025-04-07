@@ -10,6 +10,7 @@ import "./App.css";
 import Admin from "./pages/Admin";
 import NewElections from "./pages/NewElections";
 import ListElections from "./pages/ListElections";
+import ManageCandidates from "./pages/ManageCandidates";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route element={<AdminRoute />}>
             <Route path="/newElection" element={<NewElections />} />
             <Route path="/electionsDashboard" element={<ListElections />} />
+            <Route path="/electionsDashboard/:eveId" element={<ManageCandidates />} />
             <Route path="/admin" element={<Admin />} />
           </Route>
         </Routes>

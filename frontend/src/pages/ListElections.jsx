@@ -12,35 +12,42 @@ const ListElections = () => {
   // Pagination
   const [activePage, setActivePage] = useState(1);
   const limit = 4;
-  const paginatedElections = elections.slice((activePage - 1) * limit, activePage * limit);
+  const paginatedElections = elections.slice(
+    (activePage - 1) * limit,
+    activePage * limit
+  );
 
-  useEffect(() => {
-    const fetchAllElections = async () => {
-      try {
-        const electionsData = await contract.getAllElections();
-        const cleanElections = electionsData.map((el, index) => ({
-          id: index,
-          electionId: Number(el.electionId),
-          electionName: el.electionName,
-          isActive: el.isActive,
-          startTime: new Date(Number(el.startTime) * 1000).toLocaleString(),
-          endTime: new Date(Number(el.endTime) * 1000).toLocaleString(),
-          totalCandidates: Number(el.totalCandidates),
-          totalVoters: Number(el.totalVoters),
-          totalVotes: Number(el.totalVotes),
-          winnerId: Number(el.winnerId),
-          registrationPhase: el.registrationPhase,
-          votingPhase: el.votingPhase,
-          isCompleted: el.isCompleted,
-        }));
-        setElections(cleanElections);
-      } catch (error) {
-        console.error("Error fetching elections:", error);
-      }
-    };
+    useEffect(() => {
+      const fetchAllElections = async () => {
+        try {
+          const electionsData = await contract.getAllElections();
+          const cleanElections = electionsData.map((el, index) => ({
+            id: index,
+            electionId: Number(el.electionId),
+            electionName: el.electionName,
+            isActive: el.isActive,
+            startTime: new Date(Number(el.startTime) * 1000).toLocaleString(),
+            endTime: new Date(Number(el.endTime) * 1000).toLocaleString(),
+            totalCandidates: Number(el.totalCandidates),
+            totalVoters: Number(el.totalVoters),
+            totalVotes: Number(el.totalVotes),
+            winnerId: Number(el.winnerId),
+            registrationPhase: el.registrationPhase,
+            votingPhase: el.votingPhase,
+            isCompleted: el.isCompleted,
+          }));
+          setElections(cleanElections);
+        } catch (error) {
+          console.error("Error fetching elections:", error);
+        }
+      };
 
-    fetchAllElections();
-  }, [contract]);
+      console.log("Contract updated!");
+
+      // Initial fetch
+      fetchAllElections();
+
+    }, [contract, open]); // include contract in dependency array
 
   const handleOpen = (election) => {
     setSelectedElection(election);
@@ -59,7 +66,9 @@ const ListElections = () => {
           >
             <h2 className="text-xl font-semibold">{election.electionName}</h2>
             <p>Total Votes: {election.totalVotes}</p>
-            <p>Status: {election.isCompleted ? "✅ Completed" : "🕓 Ongoing"}</p>
+            <p>
+              Status: {election.isCompleted ? "✅ Completed" : "🕓 Ongoing"}
+            </p>
           </div>
         ))}
       </div>
@@ -78,13 +87,19 @@ const ListElections = () => {
         />
       </div>
 
-      <Drawer open={open} onClose={() => setOpen(false)} size="full" placement="right">
-        {/* <Drawer.Header>
-          <Drawer.Title>Election Details</Drawer.Title>
-        </Drawer.Header>
-        <Drawer.Body> */}
-          {selectedElection && <ManageElections election={selectedElection} />}
-        {/* </Drawer.Body> */}
+      <Drawer
+        open={open}
+        onClose={() => setOpen(false)}
+        size="full"
+        placement="right"
+      >
+        {selectedElection && (
+          <ManageElections
+            election={selectedElection}
+            eleId={selectedElection.electionId}
+            setOpen={setOpen}
+          />
+        )}
       </Drawer>
     </div>
   );

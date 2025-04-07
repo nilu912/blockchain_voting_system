@@ -19,45 +19,39 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     const restoreWalletConnection = async () => {
       if (!window.ethereum) return;
-  
+
       try {
+        const storedToken = sessionStorage.getItem("token");
+        if (storedToken) {
+          setToken(storedToken);
+          setIsAuthenticated(true);
+        }
         const provider = new ethers.BrowserProvider(window.ethereum);
-        const accounts = await provider.listAccounts();
-  
-        if (accounts.length > 0) {
-          const signer = await provider.getSigner();
-          const account = await signer.getAddress();
-  
-          setProvider(provider);
-          setWallet(account);
-          setSigner(signer);
-  
-          // Restore token & auth
-          const storedToken = localStorage.getItem("token");
-          if (storedToken) {
-            setToken(storedToken);
-            setIsAuthenticated(true);
-          }
-  
-          // 🔥 Contract Init
-          const contractInstance = new ethers.Contract(
-            CONTRACT_ADDRESS,
-            contractABI.abi,
-            signer
-          );
-          setContract(contractInstance);
-  
-          const ownerAdd = await contractInstance.getOwner();
-          setIsAdmin(ownerAdd.toLowerCase() === account.toLowerCase());
+        const signer = await provider.getSigner();
+        const account = await signer.getAddress();
+
+        setProvider(provider);
+        setWallet(account);
+        setSigner(signer);
+
+        const contractInstance = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          contractABI.abi,
+          signer
+        );
+        setContract(contractInstance);
+        const ownerAdd = await contractInstance.getOwner();
+        if (ownerAdd.toLowerCase().toString() == wallet.toLowerCase()) {
+          setIsAdmin(true);
         }
       } catch (err) {
         console.error("Error restoring wallet connection:", err);
       }
     };
-  
-    restoreWalletConnection();
+    if (sessionStorage.getItem("token")) restoreWalletConnection();
+    // setIsAuthenticated(true);
   }, []);
-    
+
   const connectWallet = async () => {
     if (!window.ethereum) {
       alert("Metamask is not installed, install it first!");
@@ -117,7 +111,7 @@ const AuthProvider = ({ children }) => {
       console.log("Token not found!");
       return;
     }
-    localStorage.setItem("token", token);
+    sessionStorage.setItem("token", token);
     setToken(token);
     setIsAuthenticated(true);
 
@@ -132,6 +126,7 @@ const AuthProvider = ({ children }) => {
         signer
       );
       setContract(contractInstance);
+      console.log("contract connected!");
       const ownerAdd = await contractInstance.getOwner();
       if (ownerAdd.toLowerCase().toString() == wallet.toLowerCase()) {
         setIsAdmin(true);
@@ -145,12 +140,13 @@ const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     setWallet(null);
     setProvider(null);
-    isAdmin(false);
-    localStorage.removeItem("token");
+    setIsAdmin(false);
+    sessionStorage.removeItem("token");
+    console.log("logged out.!");
   };
 
   const isAuthenticatedHandller = () => {
-    if (localStorage.getItem("token")) setIsAuthenticated(true);
+    if (sessionStorage.getItem("token")) setIsAuthenticated(true);
   };
 
   const registerHandler = async (username) => {

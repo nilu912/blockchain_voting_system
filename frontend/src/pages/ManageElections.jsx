@@ -1,12 +1,69 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Toggle, InlineEdit } from "rsuite";
 import useAuth from "../hooks/useAuth";
 import { Drawer } from "rsuite";
+import { useNavigate } from "react-router-dom";
 
-const ManageElection = ({ election }) => {
+const electionEventListener = (electionId, message) => {
+  alert("Message: " + message.toString());
+};
+const getWinnerListener = (electionId, message, winnerId) => {
+  alert(
+    "Message: " +
+      message.toString() +
+      "And winner id is: " +
+      winnerId.toString()
+  );
+};
+
+const ManageElection = ({ election, eleId, setOpen }) => {
   const { contract } = useAuth();
   const [editMod, setEditMod] = useState(false);
   const [selectedElection, setSelectedElection] = useState(election);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Attach listeners
+    contract.once("activeElectionEvent", electionEventListener);
+    contract.once("deactiveElectionEvent", electionEventListener);
+    contract.once("activeRegistrationEvent", electionEventListener);
+    contract.once("deactiveRegistrationEvent", electionEventListener);
+    contract.once("activeVotingEvent", electionEventListener);
+    contract.once("deactiveVotingEvent", electionEventListener);
+    contract.once("completeElectionEvent", electionEventListener);
+    contract.once("getWinnerEvent", getWinnerListener);
+
+    return () => {
+      console.log("Cleaning up listeners");
+      contract.off("activeElectionEvent", electionEventListener);
+      contract.off("deactiveElectionEvent", electionEventListener);
+      contract.off("activeRegistrationEvent", electionEventListener);
+      contract.off("deactiveRegistrationEvent", electionEventListener);
+      contract.off("activeVotingEvent", electionEventListener);
+      contract.off("deactiveVotingEvent", electionEventListener);
+      contract.off("completeElectionEvent", electionEventListener);
+      contract.off("getWinnerEvent", getWinnerListener);
+    };
+  }, [contract]);
+
+  const updateElectionData = async () => {
+    const data = await contract.elections(eleId);
+    setSelectedElection({
+      electionId: Number(data.electionId),
+      electionName: data.electionName,
+      isActive: data.isActive,
+      startTime: new Date(Number(data.startTime) * 1000).toLocaleString(),
+      endTime: new Date(Number(data.endTime) * 1000).toLocaleString(),
+      totalCandidates: Number(data.totalCandidates),
+      totalVoters: Number(data.totalVoters),
+      totalVotes: Number(data.totalVotes),
+      winnerId: Number(data.winnerId),
+      registrationPhase: data.registrationPhase,
+      votingPhase: data.votingPhase,
+      isCompleted: data.isCompleted,
+    });
+  };
 
   function toDateTimeLocal(dateString) {
     const date = new Date(dateString);
@@ -15,41 +72,113 @@ const ManageElection = ({ election }) => {
   }
 
   const activeElectionHandler = async (electionId) => {
-    await contract.activeElection(electionId);
-    setSelectedElection({ ...selectedElection, isActive: true });
+    try {
+      const tx = await contract.activeElection(electionId);
+      setIsLoading(true);
+      await tx.wait();
+      setIsLoading(false);
+      updateElectionData();
+    } catch (error) {
+      alert(error.reason);
+      console.error(error);
+    }
   };
 
   const deactiveElectionHandler = async (electionId) => {
-    await contract.deactiveElection(electionId);
-    setSelectedElection({ ...selectedElection, isActive: false });
+    try {
+      const tx = await contract.deactiveElection(electionId);
+      setIsLoading(true);
+      await tx.wait();
+      setIsLoading(false);
+      updateElectionData();
+    } catch (error) {
+      alert(error.reason);
+      console.error(error);
+    }
   };
 
   const registrationPhaseActive = async (electionId) => {
-    await contract.activeRegistration(electionId);
-    setSelectedElection({ ...selectedElection, registrationPhase: true });
+    try {
+      const tx = await contract.activeRegistration(electionId);
+      setIsLoading(true);
+      await tx.wait();
+      setIsLoading(false);
+      updateElectionData();
+    } catch (error) {
+      alert(error.reason);
+      console.error(error);
+    }
   };
 
   const registrationPhaseDeactive = async (electionId) => {
-    await contract.deactiveRegistration(electionId);
-    setSelectedElection({ ...selectedElection, registrationPhase: false });
+    try {
+      const tx = await contract.deactiveRegistration(electionId);
+      setIsLoading(true);
+      await tx.wait();
+      setIsLoading(false);
+      updateElectionData();
+    } catch (error) {
+      alert(error.reason);
+      console.error(error);
+    }
   };
   const votingPhaseActive = async (electionId) => {
-    await contract.activeVoting(electionId);
-    setSelectedElection({ ...selectedElection, votingPhase: true });
+    try {
+      const tx = await contract.activeVoting(electionId);
+      setIsLoading(true);
+      await tx.wait();
+      setIsLoading(false);
+      updateElectionData();
+    } catch (error) {
+      alert(error.reason);
+      console.error(error);
+    }
   };
   const votingPhaseDeactive = async (electionId) => {
-    await contract.deactiveVoting(electionId);
-    setSelectedElection({ ...selectedElection, votingPhase: false });
+    try {
+      const tx = await contract.deactiveVoting(electionId);
+      setIsLoading(true);
+      await tx.wait();
+      setIsLoading(false);
+      updateElectionData();
+    } catch (error) {
+      alert(error.reason);
+      console.error(error);
+    }
   };
   const completeVoting = async (electionId) => {
-    await contract.completeElection(electionId);
-    setSelectedElection({ ...selectedElection, votingPhase: false });
+    try {
+      const tx = await contract.completeElection(electionId);
+      setIsLoading(true);
+      await tx.wait();
+      setIsLoading(false);
+      updateElectionData();
+    } catch (error) {
+      alert(error.reason);
+      console.error(error);
+    }
   };
   const getElectionWinner = async (electionId) => {
-    await contract.getWinner(electionId);
-    setSelectedElection({ ...selectedElection, votingPhase: false });
+    try {
+      const tx = await contract.getWinner(electionId);
+      setIsLoading(true);
+      await tx.wait();
+      setIsLoading(false);
+      console.log(tx);
+      updateElectionData();
+    } catch (error) {
+      alert(error.reason);
+      console.error(error);
+    }
   };
 
+  if (isLoading) {
+    return (
+      <div>
+        <h1>Loading...</h1>
+      </div>
+    );
+  }
   return (
     <>
       <Drawer.Header>
@@ -81,6 +210,19 @@ const ManageElection = ({ election }) => {
                   </span>
                 </h2>
                 <div className="flex gap-10 m-4">
+                  <Button
+                    className="mr-2 ml-2"
+                    color="green"
+                    appearance="primary"
+                    onClick={() => {
+                      setOpen(false);
+                      navigate(
+                        `/electionsDashboard/${selectedElection.electionId}`
+                      );
+                    }}
+                  >
+                    Manage Candidates
+                  </Button>
                   {selectedElection.isActive ? (
                     <Button
                       className="mr-2 ml-2"
@@ -118,7 +260,7 @@ const ManageElection = ({ election }) => {
                 <span className="font-medium">🆔 Election ID:</span>
 
                 <InlineEdit
-                  defaultValue={selectedElection.electionId}
+                  defaultValue={parseInt(selectedElection.electionId)}
                   disabled={!editMod}
                 />
               </li>
@@ -238,8 +380,14 @@ const ManageElection = ({ election }) => {
                   }
                 >
                   {selectedElection.isCompleted ? (
-                    <Button color="green" appearance="primary">
-                      Successfully
+                    <Button
+                      onClick={() => {
+                        getElectionWinner(selectedElection.electionId);
+                      }}
+                      color="green"
+                      appearance="primary"
+                    >
+                      Click to publish result
                     </Button>
                   ) : (
                     <Button
@@ -256,20 +404,6 @@ const ManageElection = ({ election }) => {
               </li>
             </ul>
             <div>
-              {selectedElection.isCompleted && (
-                <div className="w-full flex justify-end mt-5">
-                  <Button
-                    onClick={() => {
-                      getElectionWinner(selectedElection.electionId);
-                    }}
-                    color="blue"
-                    appearance="primary"
-                  >
-                    Click to publish result
-                  </Button>
-                </div>
-              )}
-
               {editMod && (
                 <div className="w-full flex justify-end mt-5">
                   <Button color="blue" appearance="primary">

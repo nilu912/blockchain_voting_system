@@ -34,9 +34,9 @@ export default function NewElections() {
     }
 
     try {
-      // await contract.createElection(electionName, startTime, endTime);
-      // alert("Election Created!");
-      console.log(electionName, startTime, endTime);
+      await contract.createElection(electionName, startTime, endTime);
+      alert("Election Created!");
+      // console.log(electionName, startTime, endTime);
       setFormData({ electionName: "", startTime: "", endTime: "" });
     } catch (error) {
       console.error("Error creating election:", error);
