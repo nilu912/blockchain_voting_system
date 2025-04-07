@@ -17,7 +17,7 @@ const ElectionSelector = ({ elections, onSelect }) => {
           <div className="p-4">
             <h2 className="text-xl font-semibold">{election.name}</h2>
             <p className="text-gray-600 text-sm mt-2">
-              {election.description}
+              description
             </p>
           </div>
         </div>
