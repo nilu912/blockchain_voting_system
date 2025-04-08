@@ -15,8 +15,7 @@ const Elections = () => {
         const activeElections = allElections.filter(
           (election) => election.isActive
         );
-
-        const formatted = activeElections.map((election, index) => ({
+        const formatted = await Promise.all(activeElections.map(async(election, index) => ({
           id: index,
           electionId: Number(election.electionId),
           name: election.electionName,
@@ -24,7 +23,9 @@ const Elections = () => {
             Number(election.startTime) * 1000
           ).toLocaleString(),
           endTime: new Date(Number(election.endTime) * 1000).toLocaleString(),
-        }));
+          isVerified: await contract.verifyVoter(Number(election.electionId))
+        })));
+
         console.log(formatted);
         setElections(formatted);
       } catch (error) {
@@ -34,6 +35,9 @@ const Elections = () => {
 
     fetchActiveElections();
   }, [contract]);
+  const handleVoterReq = () => {
+
+  }
   const getTimeRemaining = (endTimeStr) => {
     const endTime = new Date(endTimeStr).getTime();
     const now = new Date().getTime();
@@ -157,11 +161,12 @@ const Elections = () => {
                       </span>
                     </div>
                   </div>
-
+                        {election.isVerified ?
                   <button
                     className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group"
                     onClick={(e) => {
                       e.preventDefault();
+                      handleVoterReq();
                       navigate(`/election/${election.electionId}`);
                     }}
                   >
@@ -181,6 +186,31 @@ const Elections = () => {
                       ></path>
                     </svg>
                   </button>
+                  :
+                  <button
+                  className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleVoterReq();
+                    navigate(`/election/${election.electionId}`);
+                  }}
+                >
+                  <span>Register fot this Election.</span>
+                  <svg
+                    className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                    ></path>
+                  </svg>
+                </button>}
                 </div>
               </div>
             ))}

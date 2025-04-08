@@ -45,6 +45,20 @@ const nonceSchema = new Schema({
     wallet_address: {type: String, unique: true, required: true},
     nonce: {type: Number, required: true}
 })
+const votesRequestsSchema = new Schema({
+    req_id: {type: Number, unique: true, required: true},
+    user_id: {type: Number, ref: 'users', required: true},
+    elec_id: {type: Number, ref: 'elections', required: true},
+    timestamp: {type: Date, default: Date.now},
+    wallet_address: {type: String, required: true},
+    status: {
+        type: String,
+        enum: ['pending', 'accepted', 'denied'],
+        default: 'pending',
+        required: true
+    }
+})
+
 
 const usersModel = mongoose.model('users', usersSchema)
 const electionsModel = mongoose.model('elections', electionsSchema)
@@ -52,6 +66,7 @@ const candidatesModel = mongoose.model('candidates', candidatesSchema)
 const votesModel = mongoose.model('votes', votesSchema)
 const privateVotingModel = mongoose.model('privateVoting', privateVotingSchema)
 const nonceModel = mongoose.model('nonce', nonceSchema)
+const votesRequestsModel = mongoose.model('voterReq', votesRequestsSchema)
 
 module.exports = {
     usersModel,
