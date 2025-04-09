@@ -16,38 +16,42 @@ const ElectionDetails = () => {
   useEffect(() => {
     // Mock data for the specific election
     const fetchElectionData = async () => {
-      const electionData = await contract.elections(electionId);
-      await electionData.wait();
-      const candidateData = await contract.getAllCandidates(electionId);
-      await candidateData.wait();
+      const electionData = await contract.elections(Number(electionId));
+      // await electionData.wait();
+      const candidateData = await contract.getAllCandidates(Number(electionId));
+      // await candidateData.wait();
       const formattedElectionData = {
         id: electionData.electionId,
         electionId: Number(electionData.electionId),
         participants: electionData.totalCandidates,
         description: "Null",
         image:
-        "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+          "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
         name: electionData.electionName,
-        startTime: new Date(
-          Number(electionData.startTime) * 1000
-        ).toLocaleString(),
-        endTime: new Date(Number(electionData.endTime) * 1000).toLocaleString(),
+        startTime: Number(electionData.startTime),
+        endTime: Number(electionData.endTime),
         rules: [
           "Each registered voter can cast one vote",
           "Voting period lasts for 7 days",
           "Results will be published immediately after voting ends",
           "All votes are recorded on the blockchain for transparency",
         ],
+        isVoting: electionData.votingPhase,
       };
       const formattedData = candidateData.map((cand, index) => ({
         id: Number(index),
-        candidateId: Number(candidateData.candidateId),
-        candidateName: candidateData.candidateName,
-        candidateAddress: candidateData.candidateAddress,
-        voteCount: Number(candidateData.voteCount),
+        candidateId: Number(cand.candidateId),
+        candidateName: cand.candidateName,
+        candidateAddress: cand.candidateAddress.toString(),
+        voteCount: Number(cand.voteCount),
       }));
+      setIsVoting(formattedElectionData.isVoting);
+      console.log(formattedElectionData);
+      console.log(formattedData);
+      setElection(formattedElectionData);
+      setCandidates(formattedData);
 
-      const formatted = activeElections.map((election, index) => ({}));
+      // const formatted = activeElections.map((election, index) => ({}));
     };
     const mockElection = {
       electionId: Number(electionId),
@@ -106,16 +110,17 @@ const ElectionDetails = () => {
       },
     ];
 
-    setElection(mockElection);
-    setCandidates(mockCandidates);
+    // setElection(formattedElectionData);
+    // setCandidates(mockCandidates);
 
     // Check if user has already voted (mock implementation)
+    fetchElectionData();
     const mockHasVoted = false;
     setHasVoted(mockHasVoted);
   }, [electionId]);
 
   const handleVote = async () => {
-    if (!selectedCandidate) {
+    if (selectedCandidate === null) {
       setVotingError("Please select a candidate to vote");
       return;
     }
@@ -125,13 +130,15 @@ const ElectionDetails = () => {
       return;
     }
 
-    setIsVoting(true);
+    // setIsVoting(true);
     setVotingError(null);
 
     try {
       // Mock voting process with a delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
+      // await new Promise((resolve) => setTimeout(resolve, 2000));
+      const tx = await contract.castVote(Number(electionId), selectedCandidate);
+      // await tx.wait();
+      alert("Your vote casted successfully!");
       // In a real implementation, this would call the smart contract
       console.log(
         `Voted for candidate ${selectedCandidate} in election ${electionId}`
@@ -140,6 +147,7 @@ const ElectionDetails = () => {
       setHasVoted(true);
       setIsVoting(false);
     } catch (error) {
+      alert("Error voting:", error.reason);
       console.error("Error voting:", error);
       setVotingError("Failed to cast vote. Please try again.");
       setIsVoting(false);
@@ -397,7 +405,7 @@ const ElectionDetails = () => {
                     >
                       <img
                         src={candidate.image}
-                        alt={candidate.name}
+                        alt={candidate.candidateName}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -424,7 +432,7 @@ const ElectionDetails = () => {
                     <div className="flex justify-between items-start">
                       <div>
                         <h3 className="font-bold text-gray-900 text-lg">
-                          {candidate.name}
+                          {candidate.candidateName}
                         </h3>
                         <p className="text-[#023047] text-sm font-medium">
                           {candidate.position}
@@ -482,38 +490,14 @@ const ElectionDetails = () => {
               <div className="mt-8 flex justify-end">
                 <button
                   onClick={handleVote}
-                  disabled={isVoting || !selectedCandidate}
+                  disabled={!isVoting || selectedCandidate === null}
                   className={`px-6 py-3 rounded-lg font-medium flex items-center ${
                     isVoting || !selectedCandidate
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                       : "bg-[#023047] text-white hover:bg-[#023047]/90"
                   }`}
                 >
-                  {isVoting ? (
-                    <>
-                      <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      Processing...
-                    </>
-                  ) : (
+                  {isVoting && (
                     <>
                       Submit Vote
                       <svg

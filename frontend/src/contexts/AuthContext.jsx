@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { useContext, useState, createContext, useEffect } from "react";
-import { getEthereumContract } from "../utils/contract";
+// import { getEthereumContract } from "../utils/contract";
 
 import contractABI from "../contracts/Voting.json";
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;

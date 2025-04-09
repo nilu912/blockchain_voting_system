@@ -4,17 +4,6 @@ import useAuth from "../hooks/useAuth";
 import { Drawer } from "rsuite";
 import { useNavigate } from "react-router-dom";
 
-const electionEventListener = (electionId, message) => {
-  alert("Message: " + message.toString());
-};
-const getWinnerListener = (electionId, message, winnerId) => {
-  alert(
-    "Message: " +
-      message.toString() +
-      "And winner id is: " +
-      winnerId.toString()
-  );
-};
 
 const ManageElection = ({ election, eleId, setOpen }) => {
   const { contract } = useAuth();
@@ -22,7 +11,8 @@ const ManageElection = ({ election, eleId, setOpen }) => {
   const [selectedElection, setSelectedElection] = useState(election);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
+  const [elecWinnerId, setElecWinnerId] = useState();
+  
   useEffect(() => {
     // Attach listeners
     contract.once("activeElectionEvent", electionEventListener);
@@ -33,7 +23,7 @@ const ManageElection = ({ election, eleId, setOpen }) => {
     contract.once("deactiveVotingEvent", electionEventListener);
     contract.once("completeElectionEvent", electionEventListener);
     contract.once("getWinnerEvent", getWinnerListener);
-
+    
     return () => {
       console.log("Cleaning up listeners");
       contract.off("activeElectionEvent", electionEventListener);
@@ -47,7 +37,21 @@ const ManageElection = ({ election, eleId, setOpen }) => {
     };
   }, [contract]);
 
+  const electionEventListener = (electionId, message) => {
+    alert("Message: " + message.toString());
+  };
+  const getWinnerListener = (electionId, message, winnerId) => {
+    setElecWinnerId(winnerId)
+    alert(
+      "Message: " +
+        message.toString() +
+        "And winner id is: " +
+        winnerId.toString()
+    );
+  };
+
   const updateElectionData = async () => {
+    console.log(selectedElection)
     const data = await contract.elections(eleId);
     setSelectedElection({
       electionId: Number(data.electionId),
@@ -161,6 +165,7 @@ const ManageElection = ({ election, eleId, setOpen }) => {
   const getElectionWinner = async (electionId) => {
     try {
       const tx = await contract.getWinner(electionId);
+      console.log(tx.winnerId)
       setIsLoading(true);
       await tx.wait();
       setIsLoading(false);
@@ -195,7 +200,7 @@ const ManageElection = ({ election, eleId, setOpen }) => {
           <Button
             onClick={async () => {
               const electionsData = await contract.getAllElections();
-              console.log("abc", electionsData);
+              // console.log("abc", electionsData);
               setOpen(false);
             }}
             appearance="primary"
@@ -218,19 +223,33 @@ const ManageElection = ({ election, eleId, setOpen }) => {
             
             <div className="p-6">
               <div className="flex flex-wrap gap-4 mb-6">
-                <Button
+              <Button
                   appearance="primary"
                   color="blue"
                   className="flex items-center gap-2"
                   onClick={() => {
                     setOpen(false);
-                    navigate(`/electionsDashboard/${selectedElection.electionId}`);
+                    navigate(`/electionsDashboard/candidates/${selectedElection.electionId}`);
                   }}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                   </svg>
                   Manage Candidates
+                </Button>
+                <Button
+                  appearance="primary"
+                  color="blue"
+                  className="flex items-center gap-2"
+                  onClick={() => {
+                    setOpen(false);
+                    navigate(`/electionsDashboard/voters/${selectedElection.electionId}`);
+                  }}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  </svg>
+                  Manage Voters
                 </Button>
                 
                 {selectedElection.isActive ? (
@@ -322,7 +341,7 @@ const ManageElection = ({ election, eleId, setOpen }) => {
                     </div>
                     
                     <div className="bg-white rounded-lg p-4 shadow-sm">
-                      <div className="text-3xl font-bold text-[#023047]">{selectedElection.winnerId || '-'}</div>
+                      <div className="text-3xl font-bold text-[#023047]">{elecWinnerId==null? '-': elecWinnerId}</div>
                       <div className="text-sm text-gray-500">Winner ID</div>
                     </div>
                   </div>

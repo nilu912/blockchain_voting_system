@@ -7,7 +7,8 @@ function userMiddleware(req, res, next) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     // console.log("token "+token)
     if(decoded) {
-        req.walletAddress = decoded.walletAddress;
+        req.wallet_address = decoded.wallet_address;
+        // console.log(decoded.wallet_address)
         next();
     } else {
         res.status(403).json({

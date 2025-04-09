@@ -48,6 +48,7 @@ const nonceSchema = new Schema({
 const votesRequestsSchema = new Schema({
     req_id: {type: Number, unique: true, required: true},
     user_id: {type: Number, ref: 'users', required: true},
+    username: {type: String, required: true},
     elec_id: {type: Number, ref: 'elections', required: true},
     timestamp: {type: Date, default: Date.now},
     wallet_address: {type: String, required: true},
@@ -74,5 +75,6 @@ module.exports = {
     candidatesModel,
     votesModel,
     privateVotingModel,
-    nonceModel
+    nonceModel,
+    votesRequestsModel
 }

@@ -8,9 +8,11 @@ app.use(express.json());
 app.use(cors());
 
 const { userRoutes } = require("./routes/userRoutes");
+const { voterRoutes } = require("./routes/votersRoutes");
 const { default: mongoose } = require("mongoose");
 
 app.use("/api/users", userRoutes);
+app.use("/api/voter", voterRoutes);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

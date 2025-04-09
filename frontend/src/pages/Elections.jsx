@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import useAuth from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-import ElectionSelector from "../components/ElectionSelector";
 const Elections = () => {
   const [elections, setElections] = useState([]);
   const { contract, wallet } = useAuth();
@@ -15,16 +15,33 @@ const Elections = () => {
         const activeElections = allElections.filter(
           (election) => election.isActive
         );
-        const formatted = await Promise.all(activeElections.map(async(election, index) => ({
-          id: index,
-          electionId: Number(election.electionId),
-          name: election.electionName,
-          startTime: new Date(
-            Number(election.startTime) * 1000
-          ).toLocaleString(),
-          endTime: new Date(Number(election.endTime) * 1000).toLocaleString(),
-          isVerified: await contract.verifyVoter(Number(election.electionId))
-        })));
+        const getVoterReqData = async (electionId) => {
+          const response = await axios.get(
+            `http://localhost:5000/api/voter/get/${electionId}`,
+            {
+              headers: {
+                token: sessionStorage.getItem("token"),
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          const status = response.data.status;
+          console.log(status);
+          return status;
+        };
+        const formatted = await Promise.all(
+          activeElections.map(async (election, index) => ({
+            id: index,
+            electionId: Number(election.electionId),
+            name: election.electionName,
+            startTime: new Date(
+              Number(election.startTime) * 1000
+            ).toLocaleString(),
+            endTime: new Date(Number(election.endTime) * 1000).toLocaleString(),
+            isVerified: await contract.verifyVoter(Number(election.electionId)),
+            req_status: await getVoterReqData(election.electionId),
+          }))
+        );
 
         console.log(formatted);
         setElections(formatted);
@@ -32,12 +49,34 @@ const Elections = () => {
         console.error("Error fetching elections:", error);
       }
     };
-
     fetchActiveElections();
   }, [contract]);
-  const handleVoterReq = () => {
 
-  }
+  const handleVoterReq = async (electionId) => {
+    try {
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        console.log("Token not found!");
+        return 0;
+      }
+      const response = await axios.post(
+        "http://localhost:5000/api/voter/create",
+        {
+          elec_id: electionId,
+        },
+        {
+          headers: {
+            token: token,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      alert("Your request is subbmited!");
+    } catch (error) {
+      alert(error.response);
+      console.error(error);
+    }
+  };
   const getTimeRemaining = (endTimeStr) => {
     const endTime = new Date(endTimeStr).getTime();
     const now = new Date().getTime();
@@ -107,7 +146,10 @@ const Elections = () => {
                 </div>
 
                 <div className="relative z-20 p-6 -mt-6">
-                  <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-gray-100 transition-colors" style={{color: "white", opacity:"80%"}}>
+                  <h2
+                    className="text-2xl font-bold text-white mb-2 group-hover:text-gray-100 transition-colors"
+                    style={{ color: "white", opacity: "80%" }}
+                  >
                     {election.name}
                   </h2>
                   <p className="text-white/80 mb-6">{election.description}</p>
@@ -161,56 +203,105 @@ const Elections = () => {
                       </span>
                     </div>
                   </div>
-                        {election.isVerified ?
-                  <button
-                    className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleVoterReq();
-                      navigate(`/election/${election.electionId}`);
-                    }}
-                  >
-                    <span>Cast Your Vote</span>
-                    <svg
-                      className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
+                  {election.req_status ? (
+                    <>
+                      {(election.req_status == "accepted" && election.isVerified) ? (
+                        <button
+                          className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            // handleVoterReq();
+                            navigate(`/election/${election.electionId}`);
+                          }}
+                        >
+                          <span>Cast Your Vote</span>
+                          <svg
+                            className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M14 5l7 7m0 0l-7 7m7-7H3"
+                            ></path>
+                          </svg>
+                        </button>
+                      ) : (
+                        <>
+                          {election.req_status == "pending" ? (
+                            <button
+                              className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group"
+                            >
+                              <span>Your request in peniding stage..</span>
+                              <svg
+                                className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                ></path>
+                              </svg>
+                            </button>
+                          ) : (
+                            <button
+                              className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group"
+                            >
+                              <span>Denied</span>
+                              <svg
+                                className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                ></path>
+                              </svg>
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <button
+                      className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleVoterReq(election.electionId);
+                        // navigate(`/election/${election.electionId}`);
+                      }}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M14 5l7 7m0 0l-7 7m7-7H3"
-                      ></path>
-                    </svg>
-                  </button>
-                  :
-                  <button
-                  className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleVoterReq();
-                    navigate(`/election/${election.electionId}`);
-                  }}
-                >
-                  <span>Register fot this Election.</span>
-                  <svg
-                    className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M14 5l7 7m0 0l-7 7m7-7H3"
-                    ></path>
-                  </svg>
-                </button>}
+                      <span>Register fot this Election.</span>
+                      <svg
+                        className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M14 5l7 7m0 0l-7 7m7-7H3"
+                        ></path>
+                      </svg>
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

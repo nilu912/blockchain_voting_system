@@ -12,6 +12,7 @@ import NewElections from "./pages/NewElections";
 import ListElections from "./pages/ListElections";
 import ManageCandidates from "./pages/ManageCandidates";
 import ElectionDetails from "./pages/ElectionDetails";
+import ManageVoters from "./pages/ManageVoters";
 
 function App() {
   return (
@@ -28,7 +29,8 @@ function App() {
           <Route element={<AdminRoute />}>
             <Route path="/newElection" element={<NewElections />} />
             <Route path="/electionsDashboard" element={<ListElections />} />
-            <Route path="/electionsDashboard/:eveId" element={<ManageCandidates />} />
+            <Route path="/electionsDashboard/candidates/:eveId" element={<ManageCandidates />} />
+            <Route path="/electionsDashboard/voters/:eveId" element={<ManageVoters />} />
             <Route path="/admin" element={<Admin />} />
           </Route>
         </Routes>

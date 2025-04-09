@@ -169,10 +169,10 @@ contract Voting{
         }
         return (allCandidates);
     }
-    function regVoter(string memory _voterName, uint _electionId, uint _candidateId)
-                 isValidString(_voterName) public{
+    function regVoter(string memory _voterName, uint _electionId, uint _candidateId, address _voterAddress) onlyAdmin
+                 isValidString(_voterName) isValidAddress(_voterAddress) public{
         uint candidateCount = elections[_electionId].totalCandidates;
-        require(!voters[_electionId][msg.sender].isRegistered, "voter is already registered!");
+        require(!voters[_electionId][_voterAddress].isRegistered, "voter is already registered!");
         uint voterCount = elections[_electionId].totalVoters++;
         require(_electionId < electionCount,"Invalid election id");
         require(_candidateId < candidateCount,"invalid candidate id");
@@ -180,10 +180,10 @@ contract Voting{
         require(elections[_electionId].isActive, "election is not active!");
         require(elections[_electionId].registrationPhase, "Registration phase is not active!");
         // require(candidates[_electionId][_candidateId].electionId == _electionId,"Invalid Candidate Id");
-        voters[_electionId][msg.sender] = Voter({ 
+        voters[_electionId][_voterAddress] = Voter({ 
                     voterId: newVoterId,
                     voterName: _voterName,
-                    voterAddress: msg.sender,
+                    voterAddress: _voterAddress,
                     electionId: _electionId,
                     candidateId: 0,
                     isVoted: false,
