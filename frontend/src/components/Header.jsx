@@ -71,8 +71,8 @@ const Header = () => {
             <Nav.Item as={NavLink} to="/election">
               Election
             </Nav.Item>
-            <Nav.Item as={NavLink} to="/voting">
-              Voting
+            <Nav.Item as={NavLink} to="/result">
+              Results
             </Nav.Item>
           </>
         )}

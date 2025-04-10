@@ -114,13 +114,15 @@ const Elections = () => {
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-[#023047]">
             Active Elections
           </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Experience transparent, tamper-proof elections with our cutting-edge
-            blockchain technology.
-            <span className="block mt-2 text-[#023047] font-medium">
-              Every vote is securely recorded.
-            </span>
-          </p>
+          <div className="text-gray-600 text-lg max-w-2xl mx-auto">
+            <p>
+              Experience transparent, tamper-proof elections with our
+              cutting-edge blockchain technology.
+              <span className="block mt-2 text-[#023047] font-medium">
+                Every vote is securely recorded.
+              </span>
+            </p>
+          </div>
         </div>
 
         {elections.length > 0 ? (
@@ -205,7 +207,8 @@ const Elections = () => {
                   </div>
                   {election.req_status ? (
                     <>
-                      {(election.req_status == "accepted" && election.isVerified) ? (
+                      {election.req_status == "accepted" &&
+                      election.isVerified ? (
                         <button
                           className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group"
                           onClick={(e) => {
@@ -233,9 +236,7 @@ const Elections = () => {
                       ) : (
                         <>
                           {election.req_status == "pending" ? (
-                            <button
-                              className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group"
-                            >
+                            <button className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group">
                               <span>Your request in peniding stage..</span>
                               <svg
                                 className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
@@ -253,9 +254,7 @@ const Elections = () => {
                               </svg>
                             </button>
                           ) : (
-                            <button
-                              className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group"
-                            >
+                            <button className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group">
                               <span>Denied</span>
                               <svg
                                 className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
@@ -324,16 +323,23 @@ const Elections = () => {
                 ></path>
               </svg>
             </div>
-            <h3 className="text-2xl font-bold text-white mb-3">
+            <h3
+              className="text-2xl font-bold text-white mb-3"
+              style={{ color: "white", opacity: "80%" }}
+            >
               No Active Elections
             </h3>
-            <p className="text-white/80 max-w-md mx-auto">
-              The next round of elections is being prepared. Check back soon or
-              subscribe to notifications.
-            </p>
-            <button className="mt-8 px-8 py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors">
-              Get Notified
-            </button>
+            <div className="text-white/80 max-w-md mx-auto">
+              <p>
+                The next round of elections is being prepared. Check back soon
+                or subscribe to notifications.
+              </p>
+            </div>
+            <div className="m-6">
+              <button className="mt-8 px-8 py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors">
+                Get Notified
+              </button>
+            </div>
           </div>
         )}
       </div>

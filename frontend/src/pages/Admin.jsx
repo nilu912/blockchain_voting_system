@@ -143,7 +143,6 @@ export default function Admin() {
 
   return (
     <>
-      {" "}
       <Drawer placement={placement} open={open} onClose={() => setOpen(false)}>
         <Drawer.Header>
           <Drawer.Title>Drawer Title</Drawer.Title>
@@ -580,15 +579,15 @@ export default function Admin() {
                                           <img
                                             className="h-10 w-10 rounded-md object-cover"
                                             src={election.image}
-                                            alt={election.name}
+                                            alt={election.electionName}
                                           />
                                         </div>
                                         <div className="ml-4">
                                           <div className="text-sm font-medium text-gray-900">
-                                            {election.name}
+                                            {election.electionName}
                                           </div>
                                           <div className="text-sm text-gray-500">
-                                            {election.category}
+                                            {election.electionName}
                                           </div>
                                         </div>
                                       </div>
@@ -607,10 +606,10 @@ export default function Admin() {
                                       </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                      {formatDate(election.startTime)}
+                                      {election.startTime}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                      {formatDate(election.endTime)}
+                                      {election.endTime}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                       {election.participants}
@@ -971,12 +970,12 @@ export default function Admin() {
                                               <img
                                                 className="h-10 w-10 rounded-full object-cover"
                                                 src={candidate.image}
-                                                alt={candidate.name}
+                                                alt={candidate.electionName}
                                               />
                                             </div>
                                             <div className="ml-4">
                                               <div className="text-sm font-medium text-gray-900">
-                                                {candidate.name}
+                                                {candidate.electionName}
                                               </div>
                                             </div>
                                           </div>
@@ -1308,10 +1307,10 @@ export default function Admin() {
                                           </div>
                                           <div className="ml-4">
                                             <div className="text-sm font-medium text-gray-900">
-                                              {election.name}
+                                              {election.electionName}
                                             </div>
                                             <div className="text-sm text-gray-500">
-                                              {election.category}
+                                              {election.electionName}
                                             </div>
                                           </div>
                                         </div>

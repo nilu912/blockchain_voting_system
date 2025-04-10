@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import { ethers } from "ethers";
 
 const ElectionDetails = () => {
   const { electionId } = useParams();
@@ -19,6 +20,27 @@ const ElectionDetails = () => {
       const electionData = await contract.elections(Number(electionId));
       // await electionData.wait();
       const candidateData = await contract.getAllCandidates(Number(electionId));
+
+      try {
+        console.log("ethers: ", ethers);
+        console.log("wallet: ", wallet);
+
+        if (wallet && ethers.isAddress(wallet)) {
+          const address = ethers.getAddress(wallet);
+          console.log(address);
+
+          const voterData = await contract.voters(Number(electionId), address);
+          if (voterData.isVoted) {
+            setHasVoted(voterData.isVoted);
+            setSelectedCandidate(voterData.candidateId);
+          }
+          console.log("hasVoted: ", voterData.isVoted);
+        } else {
+          console.error("Invalid or missing wallet address");
+        }
+      } catch (error) {
+        console.error("Error fetching voter data:", error);
+      }
       // await candidateData.wait();
       const formattedElectionData = {
         id: electionData.electionId,
@@ -42,7 +64,9 @@ const ElectionDetails = () => {
         id: Number(index),
         candidateId: Number(cand.candidateId),
         candidateName: cand.candidateName,
-        candidateAddress: cand.candidateAddress.toString(),
+        candidateAddress: cand.candidateAddress
+          ? cand.candidateAddress.toString()
+          : "",
         voteCount: Number(cand.voteCount),
       }));
       setIsVoting(formattedElectionData.isVoting);
@@ -441,7 +465,7 @@ const ElectionDetails = () => {
                       {hasVoted && (
                         <div className="bg-gray-100 rounded-full px-3 py-1">
                           <span className="font-bold text-[#023047]">
-                            {candidate.voteCount}
+                            {candidate.voteCount + 1}
                           </span>
                           <span className="text-gray-500 text-xs ml-1">
                             votes

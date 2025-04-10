@@ -13,6 +13,7 @@ import ListElections from "./pages/ListElections";
 import ManageCandidates from "./pages/ManageCandidates";
 import ElectionDetails from "./pages/ElectionDetails";
 import ManageVoters from "./pages/ManageVoters";
+import Results from "./pages/Results";
 
 function App() {
   return (
@@ -23,7 +24,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route element={<PrivateRoute />}>
             <Route path="/election" element={<Elections />} />
-            <Route path="/voting" element={<Voting />} />
+            <Route path="/result" element={<Results />} />
             <Route path="/election/:electionId" element={<ElectionDetails />} />
           </Route>
           <Route element={<AdminRoute />}>
