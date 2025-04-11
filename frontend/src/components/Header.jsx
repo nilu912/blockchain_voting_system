@@ -37,6 +37,7 @@ const Header = () => {
       await loginHandler(account, signer); // Pass wallet directly
       handleClose();
     } catch (error) {
+      logoutHandler();
       const deleteNonce = await fetch(
         `http://localhost:5000/api/users/del_nonce/${account}`,
         {

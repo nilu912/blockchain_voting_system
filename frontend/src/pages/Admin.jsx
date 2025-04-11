@@ -47,7 +47,7 @@ export default function Admin() {
           votingPhase: el.votingPhase,
           isCompleted: el.isCompleted,
         }));
-        console.log(cleanElections);
+        // console.log(cleanElections);
         setElections(cleanElections);
 
       } catch (error) {
@@ -69,11 +69,8 @@ export default function Admin() {
         parseInt(election.winnerId)
       );
       setWinner(winner);
-      console.log(winner);
       setCandidate(candidates);
       setSelectedElection(election);
-      console.log(candidates);
-      console.log(election);
     } catch (error) {
       console.error(error);
     }
@@ -197,31 +194,6 @@ export default function Admin() {
                 </svg>
                 Manage Elections
               </button>
-
-              {/* <button
-                onClick={() => setActiveTab("users")}
-                className={`w-full flex items-center px-4 py-3 rounded-lg transition-all ${
-                  activeTab === "users"
-                    ? "bg-white/20 text-white"
-                    : "text-white/70 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                <svg
-                  className="w-5 h-5 mr-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                  ></path>
-                </svg>
-                Users
-              </button> */}
 
               <button
                 onClick={() => setActiveTab("results")}
@@ -500,12 +472,12 @@ export default function Admin() {
                                 >
                                   Participants
                                 </th>
-                                <th
+                                {/* <th
                                   scope="col"
                                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
                                   Actions
-                                </th>
+                                </th> */}
                               </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
@@ -559,7 +531,7 @@ export default function Admin() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                       {election.participants}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                       <div className="flex space-x-2">
                                         <button className="text-indigo-600 hover:text-indigo-900">
                                           View
@@ -573,7 +545,7 @@ export default function Admin() {
                                           </button>
                                         )}
                                       </div>
-                                    </td>
+                                    </td> */}
                                   </tr>
                                 );
                               })}
@@ -630,7 +602,7 @@ export default function Admin() {
                           </div>
                         </Link>
 
-                        <button className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-all">
+                        {/* <button className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-all">
                           <div className="bg-white/20 p-3 rounded-lg inline-block mb-4">
                             <svg
                               className="w-6 h-6 text-white"
@@ -671,9 +643,9 @@ export default function Admin() {
                               ></path>
                             </svg>
                           </div>
-                        </button>
+                        </button> */}
 
-                        <button className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-all">
+                        {/* <button className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-all">
                           <div className="bg-white/20 p-3 rounded-lg inline-block mb-4">
                             <svg
                               className="w-6 h-6 text-white"
@@ -720,7 +692,7 @@ export default function Admin() {
                               ></path>
                             </svg>
                           </div>
-                        </button>
+                        </button> */}
                       </div>
                     </>
                   )}
@@ -817,7 +789,7 @@ export default function Admin() {
                               </h4>
                               <div className="flex items-center">
                                 <img
-                                  src="/public/avtar.png"
+                                  src="/avtar.png"
                                   alt="Alex Johnson"
                                   className="w-16 h-16 rounded-full object-cover border-4 border-green-500"
                                 />
@@ -886,7 +858,7 @@ export default function Admin() {
                                             <div className="flex-shrink-0 h-10 w-10">
                                               <img
                                                 className="h-10 w-10 rounded-full object-cover"
-                                                src="/public/avtar.png"
+                                                src="/avtar.png"
                                                 alt="candidateImg"
                                               />
                                             </div>
@@ -938,220 +910,9 @@ export default function Admin() {
                             </div>
                           </div>
 
-                          {/* Blockchain Verification */}
-                          {/* <div className="mt-8 bg-blue-50 rounded-xl p-6 border border-blue-100">
-                            <h3 className="text-lg font-bold text-[#023047] mb-4">
-                              Blockchain Verification
-                            </h3>
-                            <div className="flex items-center mb-4">
-                              <div className="bg-green-100 p-2 rounded-full mr-3">
-                                <svg
-                                  className="w-5 h-5 text-green-600"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M5 13l4 4L19 7"
-                                  ></path>
-                                </svg>
-                              </div>
-                              <div>
-                                <p className="text-gray-700">
-                                  Results verified on blockchain
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                  Last verified: October 16, 2023 at 10:23 AM
-                                </p>
-                              </div>
-                            </div>
-                            <div className="bg-white rounded-lg p-4 font-mono text-sm text-gray-600 break-all">
-                              <p>
-                                Transaction Hash:
-                                0x7d2a5b6c8e9f1a3b5c7d9e2f4a6b8c0d2e4f6a8b0c2d4e6f8a0b2c4d6e8f0a2b4
-                              </p>
-                              <p className="mt-2">Block Number: 15482934</p>
-                            </div>
-                            <div className="mt-4">
-                              <button className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center">
-                                <svg
-                                  className="w-4 h-4 mr-1"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                  ></path>
-                                </svg>
-                                View on Blockchain Explorer
-                              </button>
-                            </div>
-                          </div> */}
-
-                          {/* Export Options */}
-                          {/* <div className="mt-8 flex flex-wrap gap-4">
-                            <button className="flex items-center px-4 py-2 bg-[#023047] text-white rounded-lg hover:bg-[#023047]/90 transition-colors">
-                              <svg
-                                className="w-5 h-5 mr-2"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                                ></path>
-                              </svg>
-                              Export as PDF
-                            </button>
-                            <button className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                              <svg
-                                className="w-5 h-5 mr-2"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                ></path>
-                              </svg>
-                              Export as CSV
-                            </button>
-                            <button className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                              <svg
-                                className="w-5 h-5 mr-2"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                                ></path>
-                              </svg>
-                              Share Results
-                            </button>
-                          </div> */}
                         </div>
                       </div>
 
-                      {/* Results Analytics */}
-                      {/* <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                        <div className="p-6 border-b border-gray-200">
-                          <h2 className="text-xl font-bold text-[#023047]">
-                            Voting Analytics
-                          </h2>
-                          <p className="text-gray-500 text-sm mt-1">
-                            Insights and statistics from completed elections
-                          </p>
-                        </div>
-
-                        <div className="p-6">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-gray-50 rounded-xl p-6">
-                              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                Voter Turnout
-                              </h3>
-                              <div className="relative pt-1">
-                                <div className="flex mb-2 items-center justify-between">
-                                  <div>
-                                    <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-200">
-                                      Participation Rate
-                                    </span>
-                                  </div>
-                                  <div className="text-right">
-                                    <span className="text-xs font-semibold inline-block text-blue-600">
-                                      62.5%
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200">
-                                  <div
-                                    style={{ width: "62.5%" }}
-                                    className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"
-                                  ></div>
-                                </div>
-                                <p className="text-sm text-gray-600">
-                                  248 out of 397 eligible voters participated
-                                </p>
-                              </div>
-
-                              <div className="mt-6">
-                                <h4 className="text-sm font-medium text-gray-700 mb-2">
-                                  Voting Method
-                                </h4>
-                                <div className="space-y-2">
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm text-gray-600">
-                                      Mobile App
-                                    </span>
-                                    <span className="text-sm font-medium text-gray-900">
-                                      68%
-                                    </span>
-                                  </div>
-                                  <div className="w-full bg-gray-200 rounded-full h-1.5">
-                                    <div
-                                      className="bg-indigo-500 h-1.5 rounded-full"
-                                      style={{ width: "68%" }}
-                                    ></div>
-                                  </div>
-
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm text-gray-600">
-                                      Web Browser
-                                    </span>
-                                    <span className="text-sm font-medium text-gray-900">
-                                      32%
-                                    </span>
-                                  </div>
-                                  <div className="w-full bg-gray-200 rounded-full h-1.5">
-                                    <div
-                                      className="bg-indigo-500 h-1.5 rounded-full"
-                                      style={{ width: "32%" }}
-                                    ></div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="bg-gray-50 rounded-xl p-6">
-                              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                Voting Timeline
-                              </h3>
-                              <div className="h-64 flex items-center justify-center">
-                                <p className="text-gray-500 text-center">
-                                  [Voting timeline chart would be displayed
-                                  here]
-                                  <br />
-                                  <span className="text-sm">
-                                    Shows voting activity over the election
-                                    period
-                                  </span>
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div> */}
                     </div>
                   )}
 
@@ -1195,12 +956,6 @@ export default function Admin() {
                                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                   >
                                     Active
-                                  </th>
-                                  <th
-                                    scope="col"
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                  >
-                                    Actions
                                   </th>
                                 </tr>
                               </thead>
@@ -1282,18 +1037,6 @@ export default function Admin() {
                                           }}
                                         />
                                       </td>
-                                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div className="flex space-x-2">
-                                          <button className="text-indigo-600 hover:text-indigo-900">
-                                            Edit
-                                          </button>
-                                          {phase !== "Completed" && (
-                                            <button className="text-red-600 hover:text-red-900">
-                                              Cancel
-                                            </button>
-                                          )}
-                                        </div>
-                                      </td>
                                     </tr>
                                   );
                                 })}
@@ -1305,172 +1048,6 @@ export default function Admin() {
                     </div>
                   )}
 
-                  {/* {activeTab === "users" && (
-                    <div className="space-y-8">
-                      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                        <div className="p-6 border-b border-gray-200">
-                          <h2 className="text-xl font-bold text-[#023047]">
-                            User Management
-                          </h2>
-                          <p className="text-gray-500 text-sm mt-1">
-                            Manage registered voters and administrators
-                          </p>
-                        </div>
-
-                        <div className="p-6">
-                          <div className="mb-6 flex justify-between items-center">
-                            <div>
-                              <h3 className="text-lg font-medium text-gray-900">
-                                Registered Users
-                              </h3>
-                              <p className="text-sm text-gray-500">
-                                Total: 397 users
-                              </p>
-                            </div>
-                            <button className="bg-[#023047] text-white px-4 py-2 rounded-lg hover:bg-[#023047]/90 transition-colors">
-                              Add New User
-                            </button>
-                          </div>
-
-                          <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                              <thead className="bg-gray-50">
-                                <tr>
-                                  <th
-                                    scope="col"
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                  >
-                                    User
-                                  </th>
-                                  <th
-                                    scope="col"
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                  >
-                                    Role
-                                  </th>
-                                  <th
-                                    scope="col"
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                  >
-                                    Wallet Address
-                                  </th>
-                                  <th
-                                    scope="col"
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                  >
-                                    Status
-                                  </th>
-                                  <th
-                                    scope="col"
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                  >
-                                    Actions
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody className="bg-white divide-y divide-gray-200">
-                                {[
-                                  {
-                                    id: 1,
-                                    name: "John Doe",
-                                    email: "john@example.com",
-                                    role: "Admin",
-                                    walletAddress: "0x1234...5678",
-                                    status: "Active",
-                                  },
-                                  {
-                                    id: 2,
-                                    name: "Jane Smith",
-                                    email: "jane@example.com",
-                                    role: "Voter",
-                                    walletAddress: "0x8765...4321",
-                                    status: "Active",
-                                  },
-                                  {
-                                    id: 3,
-                                    name: "Robert Johnson",
-                                    email: "robert@example.com",
-                                    role: "Voter",
-                                    walletAddress: "0x2468...1357",
-                                    status: "Inactive",
-                                  },
-                                  {
-                                    id: 4,
-                                    name: "Emily Davis",
-                                    email: "emily@example.com",
-                                    role: "Voter",
-                                    walletAddress: "0x1357...2468",
-                                    status: "Active",
-                                  },
-                                ].map((user) => (
-                                  <tr key={user.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                      <div className="flex items-center">
-                                        <div className="flex-shrink-0 h-10 w-10">
-                                          <img
-                                            className="h-10 w-10 rounded-full"
-                                            src={`https://randomuser.me/api/portraits/${
-                                              user.id % 2 === 0
-                                                ? "women"
-                                                : "men"
-                                            }/${user.id * 10}.jpg`}
-                                            alt={user.name}
-                                          />
-                                        </div>
-                                        <div className="ml-4">
-                                          <div className="text-sm font-medium text-gray-900">
-                                            {user.name}
-                                          </div>
-                                          <div className="text-sm text-gray-500">
-                                            {user.email}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                      <span
-                                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                          user.role === "Admin"
-                                            ? "bg-purple-100 text-purple-800"
-                                            : "bg-blue-100 text-blue-800"
-                                        }`}
-                                      >
-                                        {user.role}
-                                      </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                      {user.walletAddress}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                      <span
-                                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                          user.status === "Active"
-                                            ? "bg-green-100 text-green-800"
-                                            : "bg-red-100 text-red-800"
-                                        }`}
-                                      >
-                                        {user.status}
-                                      </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                      <div className="flex space-x-2">
-                                        <button className="text-indigo-600 hover:text-indigo-900">
-                                          Edit
-                                        </button>
-                                        <button className="text-red-600 hover:text-red-900">
-                                          Deactivate
-                                        </button>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )} */}
                 </>
               )}
             </div>

@@ -5,7 +5,38 @@ import useAuth from "../hooks/useAuth";
 import { Button, ButtonToolbar, Placeholder, Form, Input } from "rsuite";
 
 const Home = () => {
-  const { isAuthenticated } = useAuth();
+  const {
+    isAuthenticated,
+    isAdmin,
+    connectWallet,
+    logoutHandler,
+    loginHandler,
+  } = useAuth();
+  const connectWalletHandler = async () => {
+    const { account, signer } = await connectWallet(); // Get wallet immediately
+    try {
+      if (!account) {
+        console.error("Wallet not connected! Please try again.");
+        return;
+      }
+      await loginHandler(account, signer); // Pass wallet directly
+    } catch (error) {
+      logoutHandler();
+      const deleteNonce = await fetch(
+        `http://localhost:5000/api/users/del_nonce/${account}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log(await deleteNonce.json());
+
+      console.error("Error in connectWalletHandler:", error);
+    }
+  };
+
   return (
     <div>
       {/* Hero Section */}
@@ -25,58 +56,65 @@ const Home = () => {
             <Navbar appearance="subtle" className="bg-transparent">
               <Nav className="flex gap-4 items-center">
                 {isAuthenticated ? (
-                  <Button
-                    as={NavLink}
-                    className="px-8 py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors no-underline"
-                    style={{ padding: "12px 32px" }}
-                    to="/vote"
-                    appearance="default"
-                  >
-                    Cast Your Vote
-                  </Button>
+                  <>
+                    {isAdmin ? (
+                      <Button
+                        as={NavLink}
+                        className="px-8 py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors no-underline"
+                        style={{ padding: "12px 32px" }}
+                        to="/admin"
+                        appearance="default"
+                      >
+                        Go To Admin Page
+                      </Button>
+                    ) : (
+                      <Button
+                        as={NavLink}
+                        className="px-8 py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors no-underline"
+                        style={{ padding: "12px 32px" }}
+                        to="/election"
+                        appearance="default"
+                      >
+                        Cast Your Vote
+                      </Button>
+                    )}
+                  </>
                 ) : (
-                  // <Nav.Item
-
-                  //   className="px-8 py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors no-underline"
-                  //   style={{ padding: "12px 32px" }}
-                  // >
-                  //   Cast Your Vote
-                  // </Nav.Item>
                   <Button
                     as={NavLink}
                     className="px-8 py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors no-underline"
                     style={{ padding: "12px 32px" }}
-                    to="/"
+                    onClick={connectWalletHandler}
                     appearance="default"
                   >
                     Connect Wallet to Vote
                   </Button>
-                  // <Nav.Item
-                  //   as={NavLink}
-                  //   to="/"
-                  //   className="px-8 py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors no-underline"
-                  //   style={{ padding: "12px 32px" }}
-                  // >
-                  //   Connect Wallet to Vote
-                  // </Nav.Item>
                 )}
-                <Button
-                  as={NavLink}
-                  to="/results"
-                  className="px-8 py-3 rounded-md font-medium border-2 border-white text-white bg-white/10 hover:bg-white hover:text-indigo-700 transition-colors no-underline"
-                  style={{ padding: "12px 32px" }}
-                  appearance="default"
-                >
-                  View Results
-                </Button>
-                {/* <Nav.Item
-                  as={NavLink}
-                  to="/results"
-                  className="px-8 py-3 rounded-md font-medium border-2 border-white text-white bg-white/10 hover:bg-white hover:text-indigo-700 transition-colors no-underline"
-                  style={{ padding: "12px 32px" }}
-                >
-                  View Results
-                </Nav.Item> */}
+                {isAuthenticated && (
+                  <>
+                    {isAdmin ? (
+                      <Button
+                        as={NavLink}
+                        to="/newElection"
+                        className="px-8 py-3 rounded-md font-medium border-2 border-white text-white bg-white/10 hover:bg-white hover:text-indigo-700 transition-colors no-underline"
+                        style={{ padding: "12px 32px" }}
+                        appearance="default"
+                      >
+                        Create New Election
+                      </Button>
+                    ) : (
+                      <Button
+                        as={NavLink}
+                        to="/election"
+                        className="px-8 py-3 rounded-md font-medium border-2 border-white text-white bg-white/10 hover:bg-white hover:text-indigo-700 transition-colors no-underline"
+                        style={{ padding: "12px 32px" }}
+                        appearance="default"
+                      >
+                        View Elections
+                      </Button>
+                    )}
+                  </>
+                )}
               </Nav>
             </Navbar>
           </div>

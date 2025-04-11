@@ -11,7 +11,6 @@ import Admin from "./pages/Admin";
 import NewElections from "./pages/NewElections";
 import ListElections from "./pages/ListElections";
 import ManageCandidates from "./pages/ManageCandidates";
-// import ElectionDetails from "./pages/ElectionDetails";
 import ManageVoters from "./pages/ManageVoters";
 import Results from "./pages/Results";
 
