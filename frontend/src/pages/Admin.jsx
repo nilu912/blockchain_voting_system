@@ -2,24 +2,20 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { Toggle } from "rsuite";
-import { Drawer, ButtonToolbar, Button, IconButton, Placeholder } from "rsuite";
-import AngleRightIcon from "@rsuite/icons/legacy/AngleRight";
-import AngleLeftIcon from "@rsuite/icons/legacy/AngleLeft";
-import AngleDownIcon from "@rsuite/icons/legacy/AngleDown";
-import AngleUpIcon from "@rsuite/icons/legacy/AngleUp";
 
 export default function Admin() {
   const { isAdmin, contract } = useAuth();
   const [elections, setElections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [open, setOpen] = React.useState(false);
-  const [placement, setPlacement] = React.useState();
-
-  const handleOpen = () => {
-    setOpen(true);
-    setPlacement("right");
-  };
+  const [selectedElection, setSelectedElection] = useState({
+    electionName: "------",
+    startTime: "--",
+  });
+  const [candidates, setCandidate] = useState([]);
+  const [winner, setWinner] = useState({
+    candidateName: "-",
+  });
 
   useEffect(() => {
     if (isAdmin) {
@@ -41,22 +37,8 @@ export default function Admin() {
             "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
           category: "Education",
           isActive: el.isActive,
-          startTime: new Date(Number(el.startTime) * 1000).toLocaleDateString(
-            "en-US",
-            {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            }
-          ),
-          endTime: new Date(Number(el.endTime) * 1000).toLocaleDateString(
-            "en-US",
-            {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            }
-          ),
+          startTime: Number(el.startTime),
+          endTime: Number(el.endTime),
           participants: Number(el.totalCandidates),
           totalVoters: Number(el.totalVoters),
           votes: Number(el.totalVotes),
@@ -68,49 +50,6 @@ export default function Admin() {
         console.log(cleanElections);
         setElections(cleanElections);
 
-        // // Mock data for now
-        // const mockElections = [
-        //   {
-        //     electionId: 1,
-        //     name: "Student Council Election",
-        //     description: "Vote for your student representatives for the 2023-2024 academic year",
-        //     isActive: true,
-        //     image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
-        //     category: "Education",
-        //     participants: 248,
-        //     votes: 156,
-        //   },
-        //   {
-        //     electionId: 2,
-        //     name: "Community Board Election",
-        //     description: "Select members for the local community board",
-        //     startTime: new Date(Date.now() - 86400000 * 2).getTime() / 1000,
-        //     endTime: new Date(Date.now() + 86400000 * 5).getTime() / 1000,
-        //     isActive: true,
-        //     image: "https://images.unsplash.com/photo-1531750026848-8ada78f641c2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
-        //     category: "Community",
-        //     participants: 156,
-        //     votes: 89,
-        //   },
-        //   {
-        //     electionId: 3,
-        //     name: "Blockchain Governance Vote",
-        //     description: "Vote on proposed changes to the blockchain protocol",
-        //     startTime: new Date(Date.now() + 86400000 * 2).getTime() / 1000,
-        //     endTime: new Date(Date.now() + 86400000 * 10).getTime() / 1000,
-        //     isActive: false,
-        //     image: "https://images.unsplash.com/photo-1639322537228-f710d846310a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
-        //     category: "Technology",
-        //     participants: 0,
-        //     votes: 0,
-        //   }
-        // ];
-
-        // setElections(mockElections);
-
-        // Uncomment when contract is ready
-        // const electionList = await contract.getAllElections();
-        // setElections(electionList);
       } catch (error) {
         console.error("Error fetching elections:", error);
       } finally {
@@ -118,11 +57,30 @@ export default function Admin() {
       }
     }
   };
-
+  const fetchElection = async (e) => {
+    try {
+      if (!e) {
+        return;
+      }
+      const election = await contract.getElection(parseInt(e));
+      const candidates = await contract.getAllCandidates(parseInt(e));
+      const winner = await contract.getCandidate(
+        parseInt(e),
+        parseInt(election.winnerId)
+      );
+      setWinner(winner);
+      console.log(winner);
+      setCandidate(candidates);
+      setSelectedElection(election);
+      console.log(candidates);
+      console.log(election);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   // Get election phase
   const getElectionPhase = (startTime, endTime) => {
     const now = Date.now() / 1000;
-
     if (now > endTime) {
       return "Completed";
     } else if (now > startTime) {
@@ -141,22 +99,16 @@ export default function Admin() {
     });
   };
 
+  const getElectionStatus = (e) => {
+    if (e.isActive) return "Active";
+    else if (e.registrationPhase) return "Registration";
+    else if (e.isCompleted) return "Complete";
+    else if (e.votingPhase) return "Voting";
+    return "Not Active";
+  };
+
   return (
     <>
-      <Drawer placement={placement} open={open} onClose={() => setOpen(false)}>
-        <Drawer.Header>
-          <Drawer.Title>Drawer Title</Drawer.Title>
-          <Drawer.Actions>
-            <Button onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={() => setOpen(false)} appearance="primary">
-              Confirm
-            </Button>
-          </Drawer.Actions>
-        </Drawer.Header>
-        <Drawer.Body>
-          <Placeholder.Paragraph rows={8} />
-        </Drawer.Body>
-      </Drawer>
       <div className="min-h-screen bg-white">
         <div className="flex">
           {/* Sidebar */}
@@ -246,7 +198,7 @@ export default function Admin() {
                 Manage Elections
               </button>
 
-              <button
+              {/* <button
                 onClick={() => setActiveTab("users")}
                 className={`w-full flex items-center px-4 py-3 rounded-lg transition-all ${
                   activeTab === "users"
@@ -269,7 +221,7 @@ export default function Admin() {
                   ></path>
                 </svg>
                 Users
-              </button>
+              </button> */}
 
               <button
                 onClick={() => setActiveTab("results")}
@@ -475,15 +427,7 @@ export default function Admin() {
                                 Completed Elections
                               </p>
                               <h3 className="text-3xl font-bold mt-1">
-                                {
-                                  elections.filter(
-                                    (e) =>
-                                      getElectionPhase(
-                                        e.startTime,
-                                        e.endTime
-                                      ) === "Completed"
-                                  ).length
-                                }
+                                {elections.filter((e) => e.isCompleted).length}
                               </h3>
                             </div>
                             <div className="bg-white/20 p-3 rounded-lg">
@@ -602,14 +546,15 @@ export default function Admin() {
                                             : "bg-gray-100 text-gray-800"
                                         }`}
                                       >
-                                        {phase}
+                                        {getElectionStatus(election)}
                                       </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                      {election.startTime}
+                                      {/* {election.startTime} */}
+                                      {formatDate(election.startTime)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                      {election.endTime}
+                                      {formatDate(election.endTime)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                       {election.participants}
@@ -797,22 +742,23 @@ export default function Admin() {
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               Select Election
                             </label>
-                            <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#023047] focus:border-[#023047]">
+                            <select
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#023047] focus:border-[#023047]"
+                              onChange={(e) => {
+                                fetchElection(e.target.value);
+                              }}
+                            >
                               <option value="">
                                 Select an election to view results
                               </option>
                               {elections
-                                .filter(
-                                  (e) =>
-                                    getElectionPhase(e.startTime, e.endTime) ===
-                                    "Completed"
-                                )
+                                .filter((e) => getElectionStatus(e) === "Complete")
                                 .map((election) => (
                                   <option
                                     key={election.electionId}
                                     value={election.electionId}
                                   >
-                                    {election.name} (
+                                    {election.electionName} (
                                     {formatDate(election.endTime)})
                                   </option>
                                 ))}
@@ -825,35 +771,35 @@ export default function Admin() {
                           <div className="bg-gradient-to-r from-[#023047] to-gray-700 rounded-xl overflow-hidden mb-8">
                             <div className="p-8 text-white">
                               <h2 className="text-2xl font-bold mb-2">
-                                Student Council Election
+                                {selectedElection.electionName}
                               </h2>
                               <p className="text-white/80 mb-4">
-                                Vote for your student representatives for the
-                                2023-2024 academic year
+                                End Date:{" "}
+                                {formatDate(Number(selectedElection.endTime))}
                               </p>
                               <div className="flex flex-wrap gap-4">
+                                <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
+                                  <span className="block text-sm text-white/70">
+                                    Winner Id
+                                  </span>
+                                  <span className="text-xl font-bold text-white">
+                                    {selectedElection.winnerId}
+                                  </span>
+                                </div>
                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
                                   <span className="block text-sm text-white/70">
                                     Total Votes
                                   </span>
                                   <span className="text-xl font-bold text-white">
-                                    248
+                                    {selectedElection.totalVotes}
                                   </span>
                                 </div>
                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
                                   <span className="block text-sm text-white/70">
-                                    End Date
+                                    Total Candidates
                                   </span>
                                   <span className="text-xl font-bold text-white">
-                                    Oct 15, 2023
-                                  </span>
-                                </div>
-                                <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
-                                  <span className="block text-sm text-white/70">
-                                    Category
-                                  </span>
-                                  <span className="text-xl font-bold text-white">
-                                    Education
+                                    {selectedElection.totalCandidates}
                                   </span>
                                 </div>
                               </div>
@@ -871,19 +817,23 @@ export default function Admin() {
                               </h4>
                               <div className="flex items-center">
                                 <img
-                                  src="https://randomuser.me/api/portraits/men/32.jpg"
+                                  src="/public/avtar.png"
                                   alt="Alex Johnson"
                                   className="w-16 h-16 rounded-full object-cover border-4 border-green-500"
                                 />
                                 <div className="ml-4">
                                   <div className="font-bold text-gray-900 text-xl">
-                                    Alex Johnson
+                                    {winner.candidateName}
                                   </div>
                                   <div className="text-green-600">
-                                    487 votes (39.0%)
+                                    {winner.voteCount} votes (
+                                    {(Number(winner.voteCount) /
+                                      Number(selectedElection.totalVotes)) *
+                                      100}%
+                                    )
                                   </div>
                                   <div className="text-gray-500 mt-1">
-                                    President
+                                    Address: {winner.candidateAddress}
                                   </div>
                                 </div>
                               </div>
@@ -923,73 +873,40 @@ export default function Admin() {
                                   </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                  {[
-                                    {
-                                      id: 1,
-                                      name: "Alex Johnson",
-                                      votes: 487,
-                                      image:
-                                        "https://randomuser.me/api/portraits/men/32.jpg",
-                                      isWinner: true,
-                                    },
-                                    {
-                                      id: 2,
-                                      name: "Sarah Williams",
-                                      votes: 365,
-                                      image:
-                                        "https://randomuser.me/api/portraits/women/44.jpg",
-                                      isWinner: false,
-                                    },
-                                    {
-                                      id: 3,
-                                      name: "Michael Chen",
-                                      votes: 252,
-                                      image:
-                                        "https://randomuser.me/api/portraits/men/67.jpg",
-                                      isWinner: false,
-                                    },
-                                    {
-                                      id: 4,
-                                      name: "Jessica Rodriguez",
-                                      votes: 144,
-                                      image:
-                                        "https://randomuser.me/api/portraits/women/33.jpg",
-                                      isWinner: false,
-                                    },
-                                  ].map((candidate) => {
+                                  {candidates.map((candidate) => {
                                     const percentage = (
-                                      (candidate.votes / 1248) *
+                                      (Number(candidate.voteCount) / Number(selectedElection.totalVotes)) *
                                       100
                                     ).toFixed(1);
 
                                     return (
-                                      <tr key={candidate.id}>
+                                      <tr key={candidate.candidateId}>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                           <div className="flex items-center">
                                             <div className="flex-shrink-0 h-10 w-10">
                                               <img
                                                 className="h-10 w-10 rounded-full object-cover"
-                                                src={candidate.image}
-                                                alt={candidate.electionName}
+                                                src="/public/avtar.png"
+                                                alt="candidateImg"
                                               />
                                             </div>
                                             <div className="ml-4">
                                               <div className="text-sm font-medium text-gray-900">
-                                                {candidate.electionName}
+                                                {candidate.candidateName}
                                               </div>
                                             </div>
                                           </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                           <div className="text-sm text-gray-900">
-                                            {candidate.votes}
+                                            {candidate.voteCount}
                                           </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                           <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
                                             <div
                                               className={`h-2.5 rounded-full ${
-                                                candidate.isWinner
+                                                candidate.candidateId == selectedElection.winnerId
                                                   ? "bg-green-500"
                                                   : "bg-[#023047]"
                                               }`}
@@ -1003,7 +920,7 @@ export default function Admin() {
                                           </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                          {candidate.isWinner ? (
+                                          {candidate.candidateId == selectedElection.winnerId ? (
                                             <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                               Winner
                                             </span>
@@ -1022,7 +939,7 @@ export default function Admin() {
                           </div>
 
                           {/* Blockchain Verification */}
-                          <div className="mt-8 bg-blue-50 rounded-xl p-6 border border-blue-100">
+                          {/* <div className="mt-8 bg-blue-50 rounded-xl p-6 border border-blue-100">
                             <h3 className="text-lg font-bold text-[#023047] mb-4">
                               Blockchain Verification
                             </h3>
@@ -1078,10 +995,10 @@ export default function Admin() {
                                 View on Blockchain Explorer
                               </button>
                             </div>
-                          </div>
+                          </div> */}
 
                           {/* Export Options */}
-                          <div className="mt-8 flex flex-wrap gap-4">
+                          {/* <div className="mt-8 flex flex-wrap gap-4">
                             <button className="flex items-center px-4 py-2 bg-[#023047] text-white rounded-lg hover:bg-[#023047]/90 transition-colors">
                               <svg
                                 className="w-5 h-5 mr-2"
@@ -1133,12 +1050,12 @@ export default function Admin() {
                               </svg>
                               Share Results
                             </button>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
 
                       {/* Results Analytics */}
-                      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                      {/* <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                         <div className="p-6 border-b border-gray-200">
                           <h2 className="text-xl font-bold text-[#023047]">
                             Voting Analytics
@@ -1234,7 +1151,7 @@ export default function Admin() {
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                   )}
 
@@ -1325,13 +1242,13 @@ export default function Admin() {
                                               : "bg-gray-100 text-gray-800"
                                           }`}
                                         >
-                                          {phase}
+                                          {getElectionStatus(election)}
                                         </span>
                                       </td>
                                       <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-900">
-                                          {election.startTime} -{" "}
-                                          {election.endTime}
+                                          {formatDate(election.startTime)} -{" "}
+                                          {formatDate(election.endTime)}
                                         </div>
                                       </td>
                                       <td className="px-6 py-4 whitespace-nowrap">
@@ -1388,7 +1305,7 @@ export default function Admin() {
                     </div>
                   )}
 
-                  {activeTab === "users" && (
+                  {/* {activeTab === "users" && (
                     <div className="space-y-8">
                       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                         <div className="p-6 border-b border-gray-200">
@@ -1553,7 +1470,7 @@ export default function Admin() {
                         </div>
                       </div>
                     </div>
-                  )}
+                  )} */}
                 </>
               )}
             </div>

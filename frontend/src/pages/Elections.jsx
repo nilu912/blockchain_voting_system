@@ -6,6 +6,7 @@ import axios from "axios";
 const Elections = () => {
   const [elections, setElections] = useState([]);
   const { contract, wallet } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,7 +27,7 @@ const Elections = () => {
             }
           );
           const status = response.data.status;
-          console.log(status);
+          // console.log(status);
           return status;
         };
         const formatted = await Promise.all(
@@ -40,19 +41,23 @@ const Elections = () => {
             endTime: new Date(Number(election.endTime) * 1000).toLocaleString(),
             isVerified: await contract.verifyVoter(Number(election.electionId)),
             req_status: await getVoterReqData(election.electionId),
+            votingPhase: election.votingPhase,
+            image:
+              "https://images.unsplash.com/photo-1639322537228-f710d846310a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
           }))
         );
 
-        console.log(formatted);
         setElections(formatted);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching elections:", error);
       }
     };
     fetchActiveElections();
-  }, [contract]);
+  }, [contract, isLoading]);
 
   const handleVoterReq = async (electionId) => {
+    setIsLoading(true);
     try {
       const token = sessionStorage.getItem("token");
       if (!token) {
@@ -207,14 +212,17 @@ const Elections = () => {
                   </div>
                   {election.req_status ? (
                     <>
-                      {election.req_status == "accepted" &&
+                      {election.req_status === "accepted" &&
                       election.isVerified ? (
                         <button
-                          className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group"
+                          className="w-full py-3 rounded-md font-medium shadow-lg bg-green-100 text-green-700 hover:bg-green-200 transition-colors flex items-center justify-center group"
                           onClick={(e) => {
                             e.preventDefault();
-                            // handleVoterReq();
-                            navigate(`/election/${election.electionId}`);
+                            if (election.votingPhase) {
+                              navigate(`/election/${election.electionId}`);
+                            } else {
+                              alert("Voting is not active yet...");
+                            }
                           }}
                         >
                           <span>Cast Your Vote</span>
@@ -230,61 +238,34 @@ const Elections = () => {
                               strokeLinejoin="round"
                               strokeWidth="2"
                               d="M14 5l7 7m0 0l-7 7m7-7H3"
-                            ></path>
+                            />
                           </svg>
                         </button>
+                      ) : election.req_status === "pending" ? (
+                        <button
+                          className="w-full py-3 rounded-md font-medium shadow-lg bg-yellow-100 text-yellow-800 cursor-not-allowed flex items-center justify-center"
+                          disabled
+                        >
+                          <span>Your request is pending...</span>
+                        </button>
                       ) : (
-                        <>
-                          {election.req_status == "pending" ? (
-                            <button className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group">
-                              <span>Your request in peniding stage..</span>
-                              <svg
-                                className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                                ></path>
-                              </svg>
-                            </button>
-                          ) : (
-                            <button className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group">
-                              <span>Denied</span>
-                              <svg
-                                className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                                ></path>
-                              </svg>
-                            </button>
-                          )}
-                        </>
+                        <button
+                          className="w-full py-3 rounded-md font-medium shadow-lg bg-red-100 text-red-700 cursor-not-allowed flex items-center justify-center"
+                          disabled
+                        >
+                          <span>Your request was denied</span>
+                        </button>
                       )}
                     </>
                   ) : (
                     <button
-                      className="w-full py-3 rounded-md font-medium shadow-lg bg-white/90 text-indigo-700 hover:bg-white transition-colors flex items-center justify-center group"
+                      className="w-full py-3 rounded-md font-medium shadow-lg bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition-colors flex items-center justify-center group"
                       onClick={(e) => {
                         e.preventDefault();
                         handleVoterReq(election.electionId);
-                        // navigate(`/election/${election.electionId}`);
                       }}
                     >
-                      <span>Register fot this Election.</span>
+                      <span>Register for this Election</span>
                       <svg
                         className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
                         fill="none"
@@ -297,7 +278,7 @@ const Elections = () => {
                           strokeLinejoin="round"
                           strokeWidth="2"
                           d="M14 5l7 7m0 0l-7 7m7-7H3"
-                        ></path>
+                        />
                       </svg>
                     </button>
                   )}

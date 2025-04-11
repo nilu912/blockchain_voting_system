@@ -47,7 +47,7 @@ const ListElections = () => {
       }
     };
 
-    console.log("Contract updated!");
+    // console.log("Contract updated!");
 
     // Initial fetch
     fetchAllElections();

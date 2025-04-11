@@ -99,7 +99,7 @@ const ManageVoters = () => {
         await tx.wait();
         alert("That voter is eligable to vote now!");
       } catch (error) {
-        alert(error.resone);
+        alert(error.reason);
         console.error(error);
       }
       console.log(`Voter with ID ${id} has been accepted.`);

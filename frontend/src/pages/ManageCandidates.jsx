@@ -71,7 +71,7 @@ const ManageCandidates = () => {
       await newCandidate.wait();
       // isLoading(true);
     } catch (error) {
-      alert("Message: " + error);
+      alert("Message: " + error.reason);
       console.error(error);
     }
     activeItem.status = activeItem.status ? null : "EDIT";

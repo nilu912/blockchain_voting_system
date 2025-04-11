@@ -94,7 +94,7 @@ const AuthProvider = ({ children }) => {
       console.log("nonce not found!");
       return;
     }
-    console.log(nonce);
+    // console.log(nonce);
     const signature = await signer.signMessage(nonce, wallet);
 
     const verifyResponce = await fetch(
@@ -120,6 +120,7 @@ const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const contractCalling = async () => {
+      if(wallet){
       const contractInstance = new ethers.Contract(
         CONTRACT_ADDRESS,
         contractABI.abi,
@@ -131,6 +132,7 @@ const AuthProvider = ({ children }) => {
       if (ownerAdd.toLowerCase().toString() == wallet.toLowerCase()) {
         setIsAdmin(true);
       }
+    }else return;
     };
 
     contractCalling();
