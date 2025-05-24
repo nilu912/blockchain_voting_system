@@ -128,6 +128,7 @@ const AuthProvider = ({ children }) => {
       setContract(contractInstance);
       console.log("contract connected!");
       const ownerAdd = await contractInstance.getOwner();
+
       if (ownerAdd.toLowerCase().toString() == wallet.toLowerCase()) {
         setIsAdmin(true);
       }
