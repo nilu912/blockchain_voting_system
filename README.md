@@ -3,7 +3,7 @@
 A **decentralized and transparent voting platform** built using blockchain technology, allowing users to **vote securely and verify results** without relying on a central authority.  
 
 This system integrates **Solidity smart contracts**, a **ReactJS frontend**, and **Node.js + MongoDB backend**, providing a modern, secure, and transparent approach to electronic voting.
-
+ 
 ---
 
 ## 🚀 Features
